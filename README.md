@@ -42,12 +42,6 @@ Al caricamento la pagina scarica da CDN, se raggiungibili:
 
 Il gioco funziona anche senza questi due caricamenti.
 
-## Pubblicazione su GitHub Pages
-
-1. Copia `index.html` nella radice del repository.
-2. In *Settings → Pages* scegli il branch (ad esempio `main`) e la cartella `/ (root)`.
-3. La pagina sarà disponibile all'indirizzo `https://<utente>.github.io/<repository>/`.
-
 ## Struttura
 
 Tutto il codice è in `index.html`, in tre parti:
