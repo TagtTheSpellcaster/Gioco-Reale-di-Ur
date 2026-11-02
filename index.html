@@ -1,6 +1,15 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!DOCTYPE html>
+<!--
+  Gioco Reale di Ur v1.5
+  Copyright (C) 2026 Alessandro Valli
+  SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Il Gioco Reale di Ur nel browser: regole Finkel e Bell, dadi 3D, audio e storia.">
 <title>Gioco Reale di Ur</title>
-<meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Marcellus&display=swap" rel="stylesheet">
@@ -207,15 +216,27 @@ details.rules summary{cursor:pointer;font:400 21px var(--font-display);letter-sp
 .st-end{position:absolute;z-index:3;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center}
 .st-end.on{display:flex}
 .st-end button{font:500 17px var(--font-body);color:#eadfc6;background:transparent;border:1px solid #bda468;border-radius:6px;padding:10px 20px;cursor:pointer;min-width:200px}
+@media (min-width:1000px){
+  body{padding-block:12px 40px}
+  .wrap{max-width:1560px;gap:12px}
+  .stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(300px,24vw);gap:18px;align-items:start}
+  .stage .deck{grid-template-columns:minmax(0,1fr);gap:12px}
+  .stage .panel{padding:14px}
+  .stage #diceCanvas{width:100%;flex:1 1 100%}
+  .stage .pcard{padding:10px 14px}
+}
 </style>
+</head>
+<body>
 
 <main class="wrap">
   <header class="top">
     <h1>Gioco Reale di Ur</h1>
-    <p class="sub">Tavoliere dalla necropoli reale di Ur, circa 2600 a.C. Cinque o sette pedine a testa, quattordici caselle di percorso.</p>
+    <p class="sub"><span class="ver">v1.5</span> · Tavoliere dalla necropoli reale di Ur, circa 2600 a.C. Cinque o sette pedine a testa, quattordici caselle di percorso.</p>
     <div class="hbtns"><button type="button" class="btn alt" id="storyBtn">Avvia la storia</button><button type="button" class="btn alt" id="tutBtn">Regole illustrate</button></div>
   </header>
 
+  <div class="stage">
   <svg id="board" viewBox="-260 -260 19420 7607" role="group" aria-label="Tavoliere del Gioco Reale di Ur">
     <defs>
       <g id="ros"><path class="ros-a" d="M17745 1245c136,76 249,197 313,352 64,155 70,320 28,470 -136,-76 -249,-197 -313,-352 -64,-155 -70,-320 -28,-470zm-90 -37c-76,136 -197,248 -352,312 -155,65 -320,71 -470,28 76,-136 197,-248 352,-313 155,-64 320,-70 470,-27zm-303 -913c136,77 248,197 313,353 64,155 70,320 27,470 -136,-77 -248,-197 -312,-353 -65,-155 -71,-320 -28,-470zm1253 519c-77,136 -197,249 -353,313 -155,64 -320,70 -470,28 77,-136 197,-249 353,-313 155,-64 320,-70 470,-28z"/><path class="ros-b" d="M17820 1198c140,-31 290,-21 432,37 156,65 276,177 353,313 -150,43 -315,37 -470,-28 -143,-59 -256,-158 -333,-279 -10,15 -25,28 -44,35 -18,8 -38,10 -56,7 31,139 21,290 -37,432 -65,155 -177,276 -313,352 -43,-150 -37,-315 28,-470 59,-142 158,-256 279,-332 -15,-11 -28,-26 -35,-44 -8,-19 -10,-38 -7,-57 -139,32 -290,22 -432,-37 -155,-64 -276,-177 -352,-313 150,-42 315,-36 470,28 142,59 256,158 332,279 11,-15 26,-27 44,-35 19,-7 38,-9 57,-6 -32,-140 -22,-290 37,-432 64,-156 177,-276 313,-353 42,150 36,315 -28,470 -59,143 -158,256 -279,333 15,10 27,25 35,44 7,18 9,38 6,56z"/></g>
@@ -250,6 +271,7 @@ details.rules summary{cursor:pointer;font:400 21px var(--font-display);letter-sp
       <div class="pcard" id="pc1"></div>
     </div>
   </section>
+  </div>
 
   <section class="lower">
     <div>
@@ -1580,5 +1602,5 @@ document.addEventListener('keydown',e=>{
 syncOpts(); startGame();
 })();
 </script>
-
-</body></html>
+</body>
+</html>
