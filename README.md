@@ -10,6 +10,8 @@
 
 Versione per browser del Gioco Reale di Ur, il gioco da tavolo diffuso in Mesopotamia dal III millennio a.C. e documentato dalle tavole della necropoli reale di Ur. Il progetto è una singola pagina HTML, senza fase di build e senza installazione.
 
+Lo puoi giocare qui: https://tagtthespellcaster.github.io/Gioco-Reale-di-Ur/
+
 ## Caratteristiche
 
 - **Due set di regole ricostruite**: Finkel (4 dadi tetraedrici) e Bell (3 dadi, con posta e banco). Varianti opzionali: regola del rimbalzo e uscita con tiro di quattro punti (Bell).
