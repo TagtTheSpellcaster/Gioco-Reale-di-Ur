@@ -129,18 +129,74 @@ details.rules summary{cursor:pointer;font:400 21px var(--font-display);letter-sp
 @media (max-width:820px){.deck,.lower{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:640px){.lbl,.num{display:none}.status{font-size:17px}.die{width:44px;height:40px}.panel{padding:14px}}
 @media (prefers-reduced-motion:reduce){.piece{transition:none}.piece.movable .halo,.dice.rolling .die{animation:none}}
+
+.top .btn{margin-left:auto}
+.tut{position:fixed;inset:0;z-index:50;background:rgba(8,11,15,.76);display:grid;place-items:center;
+  padding:max(12px,env(safe-area-inset-top,0px)) max(12px,env(safe-area-inset-right,0px)) max(12px,env(safe-area-inset-bottom,0px)) max(12px,env(safe-area-inset-left,0px))}
+.tut-box{width:min(1080px,100%);max-height:100%;background:var(--bg);color:var(--fg);border:1px solid var(--line);border-radius:12px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+.tut-box:focus{outline:none}
+.tut-head{display:flex;flex-wrap:wrap;gap:10px 18px;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--line)}
+.tut-head h2{font-size:23px}
+.tut-head .seg span{padding:7px 12px}
+.tut-body{overflow-y:auto;padding:16px 18px 20px;display:flex;flex-direction:column;gap:16px}
+.tut-body>*{flex:none}
+.sd{display:inline-block;width:13px;height:13px;border-radius:50%}.sd.p0{background:var(--p0)}.sd.p1{background:var(--p1)}
+.tut-fig{min-width:0;overflow-x:auto}
+.tsvg{display:block;width:100%;min-width:640px;height:auto}
+.tsvg .num{display:block;font-size:330px}
+.tsvg .lbl{display:block}
+.tsvg.noanim .piece{transition:none}
+.mk{stroke-width:100}
+.mk-ok{fill:rgba(46,125,79,.22);stroke:#2e7d4f}
+.mk-no{fill:rgba(179,50,26,.18);stroke:#b3321a}
+.mk-cap{fill:rgba(179,50,26,.12);stroke:#b3321a;stroke-dasharray:220 140}
+.mk-g{fill:none;stroke-width:140;stroke-linecap:round;stroke-linejoin:round}
+.mk-g.ok{stroke:#2e7d4f}.mk-g.no{stroke:#b3321a}
+.tut-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{display:inline-flex;align-items:center;gap:7px;padding:6px 12px;border:1.5px solid var(--line);border-radius:999px;background:var(--surface);font-size:16px}
+.chip.ok{border-color:#2e7d4f}.chip.no{border-color:#b3321a}
+.chip .g{font-weight:700}.chip.ok .g{color:#2e7d4f}.chip.no .g{color:#b3321a}
+.chip.res{opacity:.3;transition:opacity .4s}
+.tut-fig.played .chip.res,.tut-fig.still .chip.res{opacity:1}
+.chip.win{border-color:var(--fg);font-weight:700}
+.dd{width:17px;height:17px}
+.tut-text h3{font:400 25px var(--font-display);letter-spacing:.02em;margin:0 0 8px}
+.tut-text p{margin:0 0 9px;max-width:72ch;text-wrap:pretty}
+.tut-foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 18px;border-top:1px solid var(--line)}
+.tut-foot .btn{padding:10px 18px;min-height:42px}
+.tut-dots{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;flex:1 1 220px}
+.tut-dots button{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--muted);background:transparent;padding:0;cursor:pointer}
+.tut-dots button[aria-current="true"]{background:var(--fg);border-color:var(--fg)}
+.dt{display:grid;gap:8px}
+.dtr{display:grid;grid-template-columns:minmax(160px,auto) 52px minmax(0,1fr) minmax(120px,170px);gap:10px 16px;align-items:center;padding:9px 14px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.dtd{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dtd .die{width:36px;height:33px}
+.who{font:400 17px var(--font-display);min-width:3.6em}
+.who.p0{color:var(--p0)}.who.p1{color:var(--p1)}
+.dtv{font:500 34px/1 var(--font-mono);text-align:center}
+.dtt{display:grid;gap:1px;min-width:0}.dtt span{color:var(--muted);font-size:15.5px}
+.dtp{display:grid;gap:3px;font:500 13px var(--font-mono);color:var(--muted)}
+.bar{display:block;height:9px;border-radius:5px;background:var(--line);overflow:hidden}.bar i{display:block;height:100%;background:var(--fg)}
+.flow{list-style:none;counter-reset:s;margin:0;padding:0;display:grid;gap:8px}
+.flow li{counter-increment:s;display:grid;grid-template-columns:34px minmax(0,1fr);gap:12px;align-items:start;padding:10px 14px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+.flow li::before{content:counter(s);font:500 15px var(--font-mono);width:28px;height:28px;border-radius:50%;border:1.5px solid var(--fg);display:grid;place-items:center}
+@media (max-width:720px){.dtr{grid-template-columns:minmax(0,1fr) 44px}.dtt,.dtp{grid-column:1/-1}.tut-head h2{font-size:20px}}
 </style>
 
 <main class="wrap">
   <header class="top">
     <h1>Gioco Reale di Ur</h1>
     <p class="sub">Tavoliere dalla necropoli reale di Ur, circa 2600 a.C. Sette pedine a testa, quattordici caselle di percorso.</p>
+    <button type="button" class="btn alt" id="tutBtn">Regole illustrate</button>
   </header>
 
   <svg id="board" viewBox="-260 -260 19420 7607" role="group" aria-label="Tavoliere del Gioco Reale di Ur">
     <defs>
       <g id="ros"><path class="ros-a" d="M17745 1245c136,76 249,197 313,352 64,155 70,320 28,470 -136,-76 -249,-197 -313,-352 -64,-155 -70,-320 -28,-470zm-90 -37c-76,136 -197,248 -352,312 -155,65 -320,71 -470,28 76,-136 197,-248 352,-313 155,-64 320,-70 470,-27zm-303 -913c136,77 248,197 313,353 64,155 70,320 27,470 -136,-77 -248,-197 -312,-353 -65,-155 -71,-320 -28,-470zm1253 519c-77,136 -197,249 -353,313 -155,64 -320,70 -470,28 77,-136 197,-249 353,-313 155,-64 320,-70 470,-28z"/><path class="ros-b" d="M17820 1198c140,-31 290,-21 432,37 156,65 276,177 353,313 -150,43 -315,37 -470,-28 -143,-59 -256,-158 -333,-279 -10,15 -25,28 -44,35 -18,8 -38,10 -56,7 31,139 21,290 -37,432 -65,155 -177,276 -313,352 -43,-150 -37,-315 28,-470 59,-142 158,-256 279,-332 -15,-11 -28,-26 -35,-44 -8,-19 -10,-38 -7,-57 -139,32 -290,22 -432,-37 -155,-64 -276,-177 -352,-313 150,-42 315,-36 470,28 142,59 256,158 332,279 11,-15 26,-27 44,-35 19,-7 38,-9 57,-6 -32,-140 -22,-290 37,-432 64,-156 177,-276 313,-353 42,150 36,315 -28,470 -59,143 -158,256 -279,333 15,10 27,25 35,44 7,18 9,38 6,56z"/></g>
       <clipPath id="bclip"><polygon points="0,0 4725,0 4725,2362 9450,2362 9450,0 18900,0 18900,7087 9450,7087 9450,4725 4725,4725 4725,7087 0,7087"/></clipPath>
+      <marker id="arrh0" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto"><path d="M0 0L10 5L0 10z" fill="#3253a8"/></marker>
+      <marker id="arrh1" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto"><path d="M0 0L10 5L0 10z" fill="#a8433e"/></marker>
+      <marker id="arrhk" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="4.2" markerHeight="4.2" orient="auto"><path d="M0 0L10 5L0 10z" fill="#1c242c"/></marker>
       <radialGradient id="gp0" cx=".36" cy=".32" r=".85"><stop offset="0" style="stop-color:var(--p0-hi)"/><stop offset="1" style="stop-color:var(--p0)"/></radialGradient>
       <radialGradient id="gp1" cx=".36" cy=".32" r=".85"><stop offset="0" style="stop-color:var(--p1-hi)"/><stop offset="1" style="stop-color:var(--p1)"/></radialGradient>
     </defs>
@@ -231,6 +287,29 @@ details.rules summary{cursor:pointer;font:400 21px var(--font-display);letter-sp
     </div>
   </details>
 </main>
+
+<div class="tut" id="tut" role="dialog" aria-modal="true" aria-labelledby="tutTitle" hidden>
+  <div class="tut-box" id="tutBox" tabindex="-1">
+    <div class="tut-head">
+      <div><span class="eyebrow" id="tutStep"></span><h2 id="tutTitle">Regole illustrate</h2></div>
+      <div class="seg" id="tutSeg" role="radiogroup" aria-label="Set di regole">
+        <label><input type="radio" name="trules" value="finkel"><span>Finkel</span></label>
+        <label><input type="radio" name="trules" value="bell"><span>Bell</span></label>
+      </div>
+      <button type="button" class="btn alt" id="tutClose">Chiudi</button>
+    </div>
+    <div class="tut-body">
+      <div class="tut-fig" id="tutFig"></div>
+      <div class="tut-text" id="tutText"></div>
+    </div>
+    <div class="tut-foot">
+      <button type="button" class="btn alt" id="tutPrev">Indietro</button>
+      <div class="tut-dots" id="tutDots"></div>
+      <button type="button" class="btn alt" id="tutReplay">Riproduci</button>
+      <button type="button" class="btn" id="tutNext">Avanti</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -532,13 +611,13 @@ function kindOf(c,r){
   if(r===1)return ['five','eyes','quads','five','rosette','quads','five','grid'][c];
   return ['diamond','rosette',null,null,'eyes','five','eyes','rosette'][c];
 }
-(function buildBoard(){
+function boardLayers(){
   /* base lapislazzuli a tessere, cornice di bitume */
   let f='<polygon points="'+POLY+'" fill="'+C.lapD+'"/><g clip-path="url(#bclip)" stroke="'+C.lap+'" stroke-width="237" stroke-dasharray="300 24" fill="none">';
   [2362.5,4724.5].forEach(y=>{f+='<path d="M-10 '+y+'H18910"/>';});
   [2362.5,4725,7087.5,9450,11812.5,14175,16537.5].forEach(x=>{f+='<path d="M'+x+' -10V7097"/>';});
   f+='</g><polygon points="'+POLY+'" fill="none" stroke="'+C.bit+'" stroke-width="520" stroke-linejoin="round"/>';
-  $('#frame').innerHTML=f;
+  const L={frame:f};
   /* tessere di guscio incise */
   let h='';
   for(let r=0;r<3;r++)for(let c=0;c<8;c++){
@@ -549,7 +628,7 @@ function kindOf(c,r){
     else h+=T[k]();
     h+='</g>';
   }
-  $('#tiles').innerHTML=h;
+  L.tiles=h;
   /* strisce di rombi sul bordo */
   const strip=(x1,y1,x2,y2,nx,ny)=>{
     const len=Math.hypot(x2-x1,y2-y1), ux=(x2-x1)/len, uy=(y2-y1)/len; let s='';
@@ -559,18 +638,21 @@ function kindOf(c,r){
     }
     return s;
   };
-  $('#strips').innerHTML=strip(0,0,0,7087,-1,0)+strip(9450,0,9450,2362,-1,0)+strip(9450,4725,9450,7087,-1,0)
+  L.strips=strip(0,0,0,7087,-1,0)+strip(9450,0,9450,2362,-1,0)+strip(9450,4725,9450,7087,-1,0)
     +strip(0,7087,4725,7087,0,1)+strip(9450,7087,18900,7087,0,1)+strip(4725,2362,9450,2362,0,-1);
   /* numeri del percorso */
   let n='';
   for(let p=0;p<2;p++)for(let s=1;s<=14;s++){ if(p===1&&s>=5&&s<=12)continue; const q=cellOf(p,s); n+='<text class="num" x="'+(XS[q.c]+130)+'" y="'+(YS[q.r]+330)+'">'+s+'</text>'; }
-  $('#nums').innerHTML=n;
+  L.nums=n;
   let l='';
   [[0,330],[1,6930]].forEach(a=>{
     l+='<text class="lbl" text-anchor="middle" x="5906" y="'+a[1]+'">In salvo</text><text class="lbl" text-anchor="middle" x="8269" y="'+a[1]+'">Da giocare</text>';
   });
-  $('#lbls').innerHTML=l;
-})();
+  L.lbls=l;
+  return L;
+}
+const BL=boardLayers();
+$('#frame').innerHTML=BL.frame;$('#tiles').innerHTML=BL.tiles;$('#strips').innerHTML=BL.strips;$('#nums').innerHTML=BL.nums;$('#lbls').innerHTML=BL.lbls;
 
 function mkPiece(pc){
   const g=document.createElementNS(NS,'g');
@@ -839,6 +921,286 @@ function syncOpts(){
 }
 $('#opts').addEventListener('change',e=>{if(e.target.name==='rules')syncOpts();});
 $('#optNums').addEventListener('change',e=>svg.classList.toggle('hide-nums',!e.target.checked));
+/* ===== Regole illustrate ===== */
+const rg=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
+const dotsH=(w,n)=>{let s='';for(let i=0;i<n;i++)s+='<svg class="dd" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="'+(i<w?'#fffdf4':'#111114')+'" stroke="#1c2a55" stroke-width="1.4"/></svg>';return s;};
+const chipH=(txt,cls,pre)=>'<span class="chip '+(cls||'')+'">'+(pre||'')+txt+'</span>';
+const rollH=(w,n,txt)=>chipH('Tiro <b>'+txt+'</b>','',dotsH(w,n));
+const okc=t=>chipH(t,'ok','<span class="g">✓</span>'), noc=t=>chipH(t,'no','<span class="g">✕</span>'), resc=(t,c)=>chipH(t,'res '+(c||''));
+const R4=(w,txt)=>rollH(w,4,txt||(w+' '+(w===1?'vertice bianco':'vertici bianchi')));
+const R3=(w,txt)=>rollH(w,3,txt);
+const FRAC=[1,4,6,4,1];
+function diceTable(rows){
+  return '<div class="dt">'+rows.map(r=>'<div class="dtr"><div class="dtd">'+(r.who?'<span class="who p'+r.o+'">'+r.who+'</span>':'')+diceHTML(r.d)+'</div><div class="dtv">'+r.big+'</div><div class="dtt"><b>'+r.t+'</b>'+(r.s?'<span>'+r.s+'</span>':'')+'</div>'
+    +(r.pt?'<div class="dtp"><span class="bar"><i style="width:'+r.bar+'%"></i></span><span>'+r.pt+'</span></div>':'')+'</div>').join('')+'</div>';
+}
+const finRows=[0,1,2,3,4].map(w=>({d:Array.from({length:4},(_,i)=>i<w),big:String(w),
+  t:w===0?'Nessun movimento: si passa':'Avanza di '+w+(w===1?' casella':' caselle'),
+  s:w===0?'Tutti i vertici in alto sono neri':'oppure immetti una pedina in casella '+w,
+  pt:FRAC[w]+' volte su 16',bar:FRAC[w]/6*100}));
+const bellRows=[
+  {d:[true,true,true],big:'5',t:'Immetti una pedina e rilancia',s:'oppure avanza di 5 caselle una pedina in gioco',pt:'1 volta su 8',bar:100/3},
+  {d:[false,false,false],big:'4',t:'Avanza di 4 caselle e rilancia',s:'tre vertici neri',pt:'1 volta su 8',bar:100/3},
+  {d:[true,true,false],big:'1',t:'Avanza di 1 casella e rilancia',s:'due vertici bianchi',pt:'3 volte su 8',bar:100},
+  {d:[true,false,false],big:'0',t:'Si passa il turno',s:'senza spostamenti e senza rilanciare',pt:'3 volte su 8',bar:100}];
+const routes=[{o:0,seq:rg(1,14),dy:-170},{o:1,seq:rg(1,14),dy:170}];
+
+const FIN=[
+ {t:'Scopo e percorso',p:[
+   `Ogni giocatore ha <b>sette pedine</b>. Vince chi per primo le porta tutte in salvo, cioè fuori dal tavoliere, dopo aver percorso quattordici caselle.`,
+   `Il percorso ha tre tratti: quattro caselle nella propria corsia (1-4), otto nella corsia centrale in comune (5-12) e due caselle finali di nuovo nella propria corsia (13-14). Le <b>rosette</b> sono alle caselle 4, 8 e 14.`,
+   `Le pedine in attesa stanno nel mucchio «Da giocare», quelle arrivate in salvo nel mucchio «In salvo». Blu usa la corsia in alto, Rosso quella in basso.`],
+  sc:{type:'board',arrows:routes,chips:[chipH('Percorso di Blu','','<i class="sd p0"></i>'),chipH('Percorso di Rosso','','<i class="sd p1"></i>'),chipH('Rosette: 4, 8 e 14')]}},
+ {t:'Chi comincia',p:[`Prima della partita ogni giocatore lancia i dadi. Comincia chi ottiene il tiro più alto; in caso di parità si ripete.`,`Nel gioco questo tiro è automatico e compare nella cronaca.`],
+  sc:{type:'dice',rows:[{who:'Blu',o:0,d:[true,true,false,false],big:'2',t:'2 vertici bianchi'},{who:'Rosso',o:1,d:[true,true,true,false],big:'3',t:'3 vertici bianchi',s:'Tiro più alto: comincia Rosso'}]}},
+ {t:'I dadi',p:[
+   `Si lanciano <b>quattro dadi a forma di piramide</b>. Ognuno ha due vertici bianchi e due neri e conta il vertice rivolto verso l'alto. Il numero di vertici bianchi in alto, da 0 a 4, è il punteggio del tiro: indica di quante caselle ci si muove.`,
+   `I punteggi centrali sono i più frequenti: il 2 esce 6 volte su 16, lo 0 e il 4 una volta su 16.`],
+  sc:{type:'dice',rows:finRows}},
+ {t:'Immettere una pedina',p:[
+   `Una pedina del mucchio «Da giocare» entra in gioco <b>muovendosi</b>: con il punteggio 3 si ferma sulla terza casella del proprio percorso, con 2 sulla seconda, e così via.`,
+   `A ogni tiro si può fare una sola cosa: immettere una pedina oppure muoverne una già in gioco.`],
+  sc:{type:'board',roll:R4(3,'3'),arrows:[{o:0,seq:['H',1,2,3]}],marks:[{o:0,sq:3,k:'ok'}],after:{b0:3}}},
+ {t:'Scegliere la mossa',p:[
+   `Con un tiro si muove una sola pedina, a scelta, del numero di caselle ottenuto. Qui Blu ha tirato 1 e può far avanzare una delle due pedine in gioco. Non può immetterne una nuova, perché la casella 1 è occupata da una sua pedina.`,
+   `Non si può rinunciare alla mossa: se ce n'è una consentita, bisogna farla.`],
+  sc:{type:'board',b:[1,6],roll:R4(1),arrows:[{o:0,seq:[1,2]},{o:0,seq:[6,7]}],marks:[{o:0,sq:2,k:'ok'},{o:0,sq:7,k:'ok'},{o:0,sq:1,k:'no'}],chips:[okc('Avanzare una pedina di 1'),noc('Immettere: casella 1 occupata')]}},
+ {t:'Saltare le pedine',p:[`Durante il movimento si possono scavalcare altre pedine, proprie o avversarie, anche più di una. Conta solo la casella in cui il movimento finisce.`],
+  sc:{type:'board',b:[3,4],r:[5],roll:R4(3,'3'),arrows:[{o:0,seq:[3,4,5,6]}],marks:[{o:0,sq:6,k:'ok'}],after:{b0:6}}},
+ {t:'Caselle occupate da pedine proprie',p:[
+   `Non si può terminare il movimento su una casella occupata da una propria pedina. Qui, con il tiro 2, la pedina in casella 3 non può muoversi. Sono consentiti l'avanzamento della pedina in 5, che va in 7, e l'immissione di una nuova pedina in casella 2.`],
+  sc:{type:'board',b:[3,5],roll:R4(2,'2'),marks:[{o:0,sq:5,k:'no'},{o:0,sq:7,k:'ok'},{o:0,sq:2,k:'ok'}],arrows:[{o:0,seq:[5,6,7]},{o:0,seq:['H',1,2]}],chips:[noc('Pedina in 3: arriverebbe sulla 5, occupata'),okc('Pedina in 5 → 7'),okc('Nuova pedina → 2')]}},
+ {t:'Catturare',p:[
+   `Se la pedina termina su una casella occupata da una pedina avversaria, questa viene <b>eliminata</b> e deve ripartire da capo: torna nel mucchio «Da giocare».`,
+   `Si può catturare solo nelle caselle 5-12, cioè nella corsia centrale in comune. Le altre caselle appartengono a un solo giocatore.`],
+  sc:{type:'board',b:[6],r:[9],roll:R4(3,'3'),arrows:[{o:0,seq:[6,7,8,9]}],marks:[{o:0,sq:9,k:'cap'}],after:{b0:9,r0:0},res:[resc('Rosso torna nel mucchio «Da giocare»')]}},
+ {t:'Le rosette e il nuovo lancio',p:[`Chi termina il movimento su una <b>rosetta</b> (caselle 4, 8 e 14) lancia di nuovo i dadi e muove ancora. Il bonus può ripetersi più volte di seguito.`],
+  sc:{type:'board',b:[2],roll:R4(2,'2'),arrows:[{o:0,seq:[2,3,4]}],marks:[{o:0,sq:4,k:'ok'}],after:{b0:4},res:[resc('Blu lancia di nuovo','win')]}},
+ {t:'Rosetta centrale occupata',p:[
+   `La rosetta centrale (casella 8) è in comune. Se è occupata da una pedina avversaria, questa <b>non può essere catturata</b> e la pedina in arrivo prosegue di una casella, fermandosi sulla 9. In questo caso non si ottiene il nuovo lancio.`,
+   `La mossa si può evitare muovendo un'altra pedina, se il tiro lo consente.`],
+  sc:{type:'board',b:[6],r:[8],roll:R4(2,'2'),arrows:[{o:0,seq:[6,7,8,9]}],marks:[{o:0,sq:8,k:'no'},{o:0,sq:9,k:'ok'}],after:{b0:9},chips:[noc('Rosetta occupata: nessuna cattura')]}},
+ {t:'Uscire dal tavoliere',p:[
+   `Per portare in salvo una pedina serve un <b>tiro esatto</b>: dalla casella 13 servono 2 caselle, dalla 14 una sola. Con un tiro più alto la pedina non può uscire e resta dov'è.`,
+   `Chi termina sulla casella 14, che è una rosetta, lancia di nuovo, ma per uscire da lì serve esattamente 1.`],
+  sc:{type:'board',b:[13],roll:R4(2,'2'),arrows:[{o:0,seq:[13,14,'X']}],after:{b0:15},res:[resc('Una pedina in salvo')]}},
+ {t:'Nessuna mossa possibile',p:[
+   `Se nessuna pedina può muoversi con il tiro ottenuto, il turno passa. Qui Blu ha tirato 3: le pedine in 13 e in 14 uscirebbero con un tiro troppo alto e non ci sono pedine da immettere.`,
+   `Si passa anche con un tiro di 0 vertici bianchi.`],
+  sc:{type:'board',b:[13,14],bo:5,roll:R4(3,'3'),marks:[{o:0,sq:13,k:'no'},{o:0,sq:14,k:'no'}],chips:[noc('Nessuna mossa: si passa')]}},
+ {t:'Variante: rimbalzo',p:[
+   `Con questa variante, se l'unica pedina che potrebbe muoversi è quella in uscita ma il tiro è troppo alto, invece di passare la pedina avanza fino all'uscita e <b>torna indietro del resto</b>.`,
+   `Qui il tiro è 3: la pedina in casella 14 avanza di 1, raggiunge l'uscita e torna indietro di 2, fermandosi sulla 13. Si attiva dalle impostazioni con «Regola del rimbalzo».`],
+  sc:{type:'board',b:[14],bo:6,roll:R4(3,'3'),arrows:[{o:0,seq:[14,'X'],dy:-260},{o:0,seq:['X',14,13],dy:260,k:'k'}],after:{b0:13},res:[resc('Variante opzionale')]}},
+ {t:'Vittoria',p:[`Vince il primo che porta in salvo tutte e sette le pedine. Qui a Blu ne manca una, in casella 14: con il tiro 1 esce e la partita finisce.`],
+  sc:{type:'board',b:[14],bo:6,roll:R4(1),arrows:[{o:0,seq:[14,'X']}],after:{b0:15},res:[resc('Blu vince: 7 pedine su 7 in salvo','win')]}},
+ {t:'Il turno in sintesi',p:[`Ecco la sequenza di un turno con le regole di Finkel.`],
+  sc:{type:'flow',steps:[
+   `Lancia i quattro dadi e conta i vertici bianchi in alto.`,
+   `Con 0 vertici bianchi il turno passa all'avversario.`,
+   `Scegli una mossa: immettere una pedina in quella casella del percorso oppure avanzare una pedina in gioco del numero ottenuto.`,
+   `Controlla la casella di arrivo: se è occupata da una tua pedina la mossa non è consentita; se c'è una pedina avversaria nella corsia centrale la catturi; se è la rosetta centrale occupata prosegui di una casella.`,
+   `Se arrivi su una rosetta (4, 8 o 14) lancia di nuovo.`,
+   `Per uscire serve un tiro esatto. Se nessuna mossa è possibile, passa.`,
+   `Vince chi porta in salvo per primo tutte e sette le pedine.`]}}
+];
+
+const BEL=[
+ {t:'Scopo e percorso',p:[
+   `Le regole di Bell sono la ricostruzione più diffusa prima degli studi di Finkel: si usano <b>tre dadi</b> e una <b>posta</b>.`,
+   `Lo scopo è lo stesso: portare in salvo tutte e sette le pedine. Il percorso è di quattordici caselle: quattro nella propria corsia (1-4), otto nella corsia centrale in comune (5-12), due finali nella propria corsia (13-14). Le rosette sono alle caselle 4, 8 e 14.`],
+  sc:{type:'board',arrows:routes,chips:[chipH('Percorso di Blu','','<i class="sd p0"></i>'),chipH('Percorso di Rosso','','<i class="sd p1"></i>'),chipH('Rosette: 4, 8 e 14')]}},
+ {t:'Posta e primo giocatore',p:[
+   `Prima di cominciare i giocatori stabiliscono il valore della posta e chi inizia, anche con un tiro di dadi: comincia chi ottiene il punteggio maggiore.`,
+   `Nel gioco la posta è di un gettone e il tiro d'apertura è automatico. Le poste pagate si accumulano nel <b>banco</b>, che spetta a chi vince.`],
+  sc:{type:'dice',rows:[{who:'Blu',o:0,d:[true,false,false],big:'1',t:'1 vertice bianco'},{who:'Rosso',o:1,d:[true,true,true],big:'3',t:'3 vertici bianchi',s:'Tiro più alto: comincia Rosso'}]}},
+ {t:'I tre dadi',p:[
+   `Si lanciano tre dadi piramidali con vertici bianchi e neri. Il risultato non si somma: <b>ogni combinazione corrisponde a una mossa precisa</b>, come nello schema.`,
+   `«Rilanciare» significa tirare ancora i dadi e fare un'altra mossa nello stesso turno.`],
+  sc:{type:'dice',rows:bellRows}},
+ {t:'Immettere la prima pedina',p:[
+   `Per mettere in gioco una pedina servono <b>tre vertici bianchi</b>. Finché non esce questo risultato, e non ci sono pedine in gioco, si passa il turno.`,
+   `La pedina viene sempre collocata sulla casella 1 e si rilanciano i dadi per spostarla.`],
+  sc:{type:'board',roll:R3(3,'3 bianchi'),arrows:[{o:0,seq:['H',1]}],marks:[{o:0,sq:1,k:'ok'}],after:{b0:1},res:[resc('Si rilancia per muoverla')]}},
+ {t:'Il rilancio della nuova pedina',p:[
+   `Il secondo lancio sposta la pedina appena immessa: tre vertici bianchi la portano avanti di 5 caselle, tre neri di 4, due bianchi di 1.`,
+   `Dopo questa mossa il turno passa all'avversario.`],
+  sc:{type:'board',b:[1],roll:R3(0,'3 neri · 4'),arrows:[{o:0,seq:[1,2,3,4,5]}],marks:[{o:0,sq:5,k:'ok'}],after:{b0:5}}},
+ {t:'Pedina ritirata',p:[
+   `Se il secondo lancio dà un solo vertice bianco non c'è movimento e la pedina appena immessa viene <b>ritirata dal gioco</b>: torna nel mucchio «Da giocare».`,
+   `Nel gioco, se la casella d'arrivo è occupata da una propria pedina, la nuova pedina resta in casella 1.`],
+  sc:{type:'board',b:[1],roll:R3(1,'1 bianco · 0'),after:{b0:0},res:[resc('Pedina ritirata')]}},
+ {t:'Tre bianchi: avanzare di 5',p:[
+   `Con tre vertici bianchi si sceglie tra due mosse: <b>immettere una pedina</b> e rilanciare, oppure <b>avanzare di 5 caselle</b> una pedina già in gioco. Nel secondo caso non si rilancia.`],
+  sc:{type:'board',b:[2,6],roll:R3(3,'3 bianchi · 5'),arrows:[{o:0,seq:['H',1]},{o:0,seq:[2,3,4,5,6,7]},{o:0,seq:[6,7,8,9,10,11]}],marks:[{o:0,sq:1,k:'ok'},{o:0,sq:7,k:'ok'},{o:0,sq:11,k:'ok'}],chips:[okc('Immettere una pedina'),okc('Pedina in 2 → 7'),okc('Pedina in 6 → 11')]}},
+ {t:'Tre neri: avanzare di 4 e rilanciare',p:[
+   `Con tre vertici neri una pedina in gioco avanza di 4 caselle e si lancia ancora.`,
+   `La pedina in casella 2 non può muoversi: arriverebbe sulla 6, occupata da una propria pedina. Si muove l'altra, da 6 a 10.`],
+  sc:{type:'board',b:[2,6],roll:R3(0,'3 neri · 4'),arrows:[{o:0,seq:[6,7,8,9,10]}],marks:[{o:0,sq:6,k:'no'},{o:0,sq:10,k:'ok'}],after:{b1:10},res:[resc('Blu rilancia','win')]}},
+ {t:'Due bianchi: avanzare di 1 e rilanciare',p:[`Con due vertici bianchi una pedina in gioco avanza di una casella e si rilancia. È il risultato più frequente insieme all'unico vertice bianco.`],
+  sc:{type:'board',b:[6],roll:R3(2,'2 bianchi · 1'),arrows:[{o:0,seq:[6,7]}],marks:[{o:0,sq:7,k:'ok'}],after:{b0:7},res:[resc('Blu rilancia','win')]}},
+ {t:'Saltare e catturare',p:[
+   `Si possono scavalcare le pedine, proprie o avversarie. Se il movimento termina su una pedina avversaria, questa torna nel mucchio e deve ripartire.`,
+   `Nelle regole di Bell le rosette non proteggono le pedine.`],
+  sc:{type:'board',b:[4],r:[9],roll:R3(3,'3 bianchi · 5'),arrows:[{o:0,seq:[4,5,6,7,8,9]}],marks:[{o:0,sq:9,k:'cap'}],after:{b0:9,r0:0},res:[resc('Rosso ricomincia')]}},
+ {t:'Rosette e posta',p:[
+   `Chi termina su una rosetta fa pagare la posta all'avversario, che la versa al banco. La rosetta di per sé non dà un nuovo lancio: si rilancia solo se lo prevede il tiro.`],
+  sc:{type:'board',b:[3],roll:R3(3,'3 bianchi · 5'),arrows:[{o:0,seq:[3,4,5,6,7,8]}],marks:[{o:0,sq:8,k:'ok'}],after:{b0:8},res:[resc('Rosso paga 1 gettone'),resc('Banco: 0 → 1')]}},
+ {t:'Uscire dal tavoliere',p:[
+   `Come in Finkel serve un <b>tiro esatto</b>. Qui la pedina in casella 11 esce con tre vertici neri, cioè 4 caselle, e poi si rilancia. Con un tiro più alto non potrebbe uscire: dalla 14 serve esattamente 1, dalla 10 esattamente 5.`],
+  sc:{type:'board',b:[11],roll:R3(0,'3 neri · 4'),arrows:[{o:0,seq:[11,12,13,14,'X']}],after:{b0:15},res:[resc('Una pedina in salvo'),resc('Blu rilancia','win')]}},
+ {t:'Nessuna mossa: si passa',p:[
+   `Se nessuna mossa è possibile si passa il turno <b>senza rilanciare</b>, anche quando il tiro avrebbe previsto un rilancio. Lo stesso vale con un solo vertice bianco.`,
+   `Qui Blu ha tirato tre bianchi, ma la pedina in 14 uscirebbe con un tiro troppo alto e non ci sono altre pedine da muovere o immettere.`],
+  sc:{type:'board',b:[14],bo:6,roll:R3(3,'3 bianchi · 5'),marks:[{o:0,sq:14,k:'no'}],chips:[noc('Nessuna mossa: si passa senza rilanciare')]}},
+ {t:'Variante: rimbalzo',p:[
+   `Se l'unica pedina che potrebbe muoversi è quella in uscita ma il tiro è troppo alto, invece di passare avanza fino all'uscita e torna indietro del resto.`,
+   `Qui il tiro è 5: la pedina in casella 14 avanza di 1, raggiunge l'uscita e torna indietro di 4, fermandosi sulla 11. Si attiva dalle impostazioni con «Regola del rimbalzo».`],
+  sc:{type:'board',b:[14],bo:6,roll:R3(3,'3 bianchi · 5'),arrows:[{o:0,seq:[14,'X'],dy:-260},{o:0,seq:['X',14,13,12,11],dy:260,k:'k'}],after:{b0:11},res:[resc('Variante opzionale')]}},
+ {t:'Variante: uscita con quattro punti',p:[
+   `In alternativa all'uscita con tiro esatto si può stabilire che una pedina esca solo con un tiro da quattro punti, cioè tre vertici neri.`,
+   `Nel gioco la pedina esce se il movimento di 4 caselle raggiunge o supera l'ultima casella: qui dalla 12. Con gli altri tiri non si esce.`],
+  sc:{type:'board',b:[12],roll:R3(0,'3 neri · 4'),arrows:[{o:0,seq:[12,13,14,'X']}],after:{b0:15},res:[resc('Una pedina in salvo')]}},
+ {t:'Vittoria e banco',p:[
+   `Vince il primo che porta in salvo tutte e sette le pedine e <b>si aggiudica l'intero banco</b> accumulato con i passaggi sulle rosette. Qui Blu esce con due vertici bianchi, cioè 1 casella.`],
+  sc:{type:'board',b:[14],bo:6,roll:R3(2,'2 bianchi · 1'),arrows:[{o:0,seq:[14,'X']}],after:{b0:15},res:[resc('Blu vince','win'),resc('Prende il banco')]}},
+ {t:'Il turno in sintesi',p:[`Ecco la sequenza di un turno con le regole di Bell.`],
+  sc:{type:'flow',steps:[
+   `Lancia i tre dadi e conta i vertici bianchi in alto.`,
+   `Un bianco: si passa il turno, senza rilanciare.`,
+   `Due bianchi: avanza una pedina di 1 e rilancia. Tre neri: avanza una pedina di 4 e rilancia.`,
+   `Tre bianchi: immetti una pedina in casella 1 e rilancia per muoverla, oppure avanza una pedina di 5.`,
+   `Non si finisce su una propria pedina; si salta, si cattura quella avversaria.`,
+   `Su una rosetta l'avversario paga la posta al banco. L'uscita richiede un tiro esatto.`,
+   `Se nessuna mossa è possibile si passa senza rilanciare. Vince chi esce per primo con tutte le pedine e prende il banco.`]}}
+];
+const TUTS={finkel:FIN,bell:BEL};
+
+let tutRules='finkel', tutI=0, tutS=null, tutTimer=0, tutOpener=null;
+const ARR_MK=['arrh0','arrh1'];
+function pieceEl(o){
+  const g=document.createElementNS(NS,'g'); g.setAttribute('class','piece p'+o);
+  g.innerHTML='<circle class="shadow" cx="30" cy="60" r="790"/><circle class="disc" r="780"/><g class="pips"><circle r="105"/><circle cx="-330" cy="-330" r="105"/><circle cx="330" cy="-330" r="105"/><circle cx="-330" cy="330" r="105"/><circle cx="330" cy="330" r="105"/></g>';
+  return g;
+}
+function tutLayout(S,pos){
+  const used={};
+  S.pcs.forEach(pc=>{
+    const p=pos[pc.id], area=p===0?'hand':(p===15?'off':null); pc.area=area;
+    const key=pc.o+(area||'x'); used[key]=used[key]||new Set();
+    if(area&&S.slot[pc.id]&&S.slot[pc.id].area===area)used[key].add(S.slot[pc.id].i); else delete S.slot[pc.id];
+  });
+  S.pcs.forEach(pc=>{
+    if(!pc.area||S.slot[pc.id])return;
+    const key=pc.o+pc.area; let i=0; while(used[key].has(i))i++; used[key].add(i); S.slot[pc.id]={area:pc.area,i};
+  });
+  S.pcs.forEach(pc=>{
+    const p=pos[pc.id]; let x,y,s=1;
+    if(pc.area){const q=slot(pc.o,pc.area,S.slot[pc.id].i);x=q.x;y=q.y;s=SC;}
+    else{const c=cellOf(pc.o,p),q=ctr(c.c,c.r);x=q.x;y=q.y;}
+    pc.el.style.transform='translate('+x+'px,'+y+'px) scale('+s+')';
+  });
+}
+function freeSlot(S,o,area,pos){
+  const used=new Set(); S.pcs.forEach(pc=>{if(pc.o===o&&pos[pc.id]===(area==='hand'?0:15)&&S.slot[pc.id])used.add(S.slot[pc.id].i);});
+  let i=0; while(used.has(i))i++; return i;
+}
+function arrowsSVG(S,list){
+  return list.map(a=>{
+    const pts=a.seq.map(v=>{
+      let q;
+      if(v==='H'){const k=S.pcs.filter(pc=>pc.o===a.o&&S.before[pc.id]===0).map(pc=>S.slot[pc.id].i).sort((x,y)=>x-y)[0]||0;q=slot(a.o,'hand',k);}
+      else if(v==='X')q=slot(a.o,'off',freeSlot(S,a.o,'off',S.before));
+      else{const c=cellOf(a.o,v);q=ctr(c.c,c.r);}
+      return q.x+' '+(q.y+(a.dy||0));
+    });
+    const col=a.k==='k'?'#1c242c':(a.o===0?'#3253a8':'#a8433e'), mk=a.k==='k'?'arrhk':ARR_MK[a.o];
+    return '<path d="M'+pts.join('L')+'" fill="none" stroke="'+col+'" stroke-width="95" stroke-linejoin="round" stroke-linecap="round" opacity=".88" marker-end="url(#'+mk+')"/>';
+  }).join('');
+}
+function marksSVG(list){
+  return list.map(m=>{
+    const c=cellOf(m.o,m.sq),q=ctr(c.c,c.r), tr='translate('+q.x+' '+q.y+')';
+    if(m.k==='ok')return '<g transform="'+tr+'"><circle r="850" class="mk mk-ok"/><path class="mk-g ok" d="M-330 20L-90 280L350 -260"/></g>';
+    if(m.k==='no')return '<g transform="'+tr+'"><circle r="850" class="mk mk-no"/><path class="mk-g no" d="M-300 -300L300 300M300 -300L-300 300"/></g>';
+    return '<g transform="'+tr+'"><circle r="870" class="mk mk-cap"/></g>';
+  }).join('');
+}
+function tutScene(sc){
+  const fig=$('#tutFig'); fig.className='tut-fig'; clearTimeout(tutTimer); tutS=null;
+  if(sc.type==='dice'){fig.innerHTML=diceTable(sc.rows);return;}
+  if(sc.type==='flow'){fig.innerHTML='<ol class="flow">'+sc.steps.map(s=>'<li><span>'+s+'</span></li>').join('')+'</ol>';return;}
+  const pcs=[];
+  [['b',0,sc.b||[],sc.bo||0],['r',1,sc.r||[],sc.ro||0]].forEach(a=>{
+    let i=0; a[2].forEach(p=>pcs.push({id:a[0]+(i++),o:a[1],pos:p}));
+    for(let j=0;j<a[3];j++)pcs.push({id:a[0]+(i++),o:a[1],pos:15});
+    while(i<7)pcs.push({id:a[0]+(i++),o:a[1],pos:0});
+  });
+  const before={}; pcs.forEach(pc=>before[pc.id]=pc.pos);
+  const after=Object.assign({},before,sc.after||{});
+  fig.innerHTML='<svg class="tsvg" viewBox="-260 -260 19420 7607" role="img" aria-label="Scenario sul tavoliere"><g>'+BL.frame+BL.tiles+BL.strips+BL.nums+'</g><g>'+BL.lbls+'</g><g class="ta"></g><g class="tp"></g><g class="tm"></g></svg>'
+    +'<div class="tut-chips">'+(sc.roll||'')+(sc.chips||[]).join('')+(sc.res||[]).join('')+'</div>';
+  const svgEl=fig.querySelector('svg'), layer=fig.querySelector('.tp');
+  pcs.forEach(pc=>{pc.el=pieceEl(pc.o);layer.appendChild(pc.el);});
+  const S={pcs,slot:{},before,after,svg:svgEl}; tutS=S;
+  svgEl.classList.add('noanim'); tutLayout(S,before);
+  fig.querySelector('.ta').innerHTML=arrowsSVG(S,sc.arrows||[]);
+  fig.querySelector('.tm').innerHTML=marksSVG(sc.marks||[]);
+  svgEl.getBoundingClientRect(); svgEl.classList.remove('noanim');
+  if(sc.after){
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches){tutLayout(S,after);fig.classList.add('still');}
+    else tutTimer=setTimeout(tutPlay,1100);
+  } else fig.classList.add('still');
+}
+function tutPlay(){ if(!tutS)return; tutLayout(tutS,tutS.after); $('#tutFig').classList.add('played'); }
+function tutReplay(){
+  if(!tutS||!TUTS[tutRules][tutI].sc.after)return;
+  clearTimeout(tutTimer); const S=tutS, fig=$('#tutFig');
+  fig.classList.remove('played'); S.svg.classList.add('noanim'); S.slot={}; tutLayout(S,S.before);
+  S.svg.getBoundingClientRect(); S.svg.classList.remove('noanim');
+  tutTimer=setTimeout(tutPlay,500);
+}
+function tutRender(){
+  const list=TUTS[tutRules], s=list[tutI];
+  $('#tutStep').textContent='Passo '+(tutI+1)+' di '+list.length+' · '+(tutRules==='finkel'?'regole di Finkel':'regole di Bell');
+  $('#tutText').innerHTML='<h3>'+s.t+'</h3>'+s.p.map(x=>'<p>'+x+'</p>').join('');
+  tutScene(s.sc);
+  $('#tutPrev').disabled=tutI===0; $('#tutNext').disabled=tutI===list.length-1;
+  $('#tutReplay').hidden=!s.sc.after;
+  $('#tutDots').innerHTML=list.map((x,i)=>'<button type="button" data-i="'+i+'" aria-label="Passo '+(i+1)+': '+x.t+'"'+(i===tutI?' aria-current="true"':'')+'></button>').join('');
+  $('.tut-body').scrollTop=0;
+}
+function tutGo(i){const n=TUTS[tutRules].length; tutI=Math.max(0,Math.min(n-1,i)); tutRender();}
+function openTut(){
+  tutOpener=document.activeElement; tutRules=$('#opts').rules.value; tutI=0;
+  document.querySelectorAll('input[name="trules"]').forEach(r=>r.checked=r.value===tutRules);
+  $('#tut').hidden=false; document.body.style.overflow='hidden'; tutRender(); $('#tutBox').focus();
+}
+function closeTut(){
+  $('#tut').hidden=true; document.body.style.overflow=''; clearTimeout(tutTimer);
+  if(tutOpener&&tutOpener.focus)tutOpener.focus();
+}
+$('#tutBtn').addEventListener('click',openTut);
+$('#tutClose').addEventListener('click',closeTut);
+$('#tutPrev').addEventListener('click',()=>tutGo(tutI-1));
+$('#tutNext').addEventListener('click',()=>tutGo(tutI+1));
+$('#tutReplay').addEventListener('click',tutReplay);
+$('#tutDots').addEventListener('click',e=>{const b=e.target.closest('button[data-i]');if(b)tutGo(+b.dataset.i);});
+$('#tutSeg').addEventListener('change',e=>{tutRules=e.target.value;tutI=0;tutRender();});
+$('#tut').addEventListener('click',e=>{if(e.target.id==='tut')closeTut();});
+document.addEventListener('keydown',e=>{
+  if($('#tut').hidden)return;
+  if(e.key==='Escape')closeTut();
+  else if(e.key==='ArrowRight'&&!(e.target.name==='trules'))tutGo(tutI+1);
+  else if(e.key==='ArrowLeft'&&!(e.target.name==='trules'))tutGo(tutI-1);
+  else if(e.key==='Tab'){
+    const f=[...$('#tutBox').querySelectorAll('button:not([disabled]):not([hidden]),input')].filter(x=>x.offsetParent!==null);
+    if(!f.length)return; const a=f[0],z=f[f.length-1];
+    if(e.shiftKey&&(document.activeElement===a||document.activeElement===$('#tutBox'))){e.preventDefault();z.focus();}
+    else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus();}
+  }
+});
+
 syncOpts(); startGame();
 })();
 </script>
