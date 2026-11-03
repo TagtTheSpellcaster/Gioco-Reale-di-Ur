@@ -10,7 +10,7 @@
 
 Versione per browser del Gioco Reale di Ur, il gioco da tavolo diffuso in Mesopotamia dal III millennio a.C. e documentato dalle tavole della necropoli reale di Ur. Il progetto è una singola pagina HTML, senza fase di build e senza installazione.
 
-Lo puoi giocare qui: https://tagtthespellcaster.github.io/Gioco-Reale-di-Ur/
+[Puoi giocarlo qui](https://tagtthespellcaster.github.io/Gioco-Reale-di-Ur/)
 
 ## Caratteristiche
 
