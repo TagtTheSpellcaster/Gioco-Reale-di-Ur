@@ -301,7 +301,7 @@ details.rules summary{cursor:pointer;font:400 21px var(--font-display);letter-sp
           <label class="chk"><input type="checkbox" id="optSfx" checked><span>Effetti sonori</span></label>
           <label class="chk"><input type="checkbox" id="optMusic"><span>Colonna sonora<small>Musica d'ambiente di ispirazione mesopotamica, generata dal browser. Vale anche per la storia.</small></span></label>
         </fieldset>
-        <div class="actions"><button type="submit" class="btn">Nuova partita</button></div>
+        <div class="actions"><button type="button" class="btn" id="newBtn">Nuova partita</button></div>
       </form>
     </div>
     <div>
@@ -1074,6 +1074,7 @@ function startGame(){
   next();
 }
 $('#opts').addEventListener('submit',e=>{e.preventDefault();startGame();});
+$('#newBtn').addEventListener('click',startGame);
 $('#againBtn').addEventListener('click',startGame);
 function syncOpts(){
   const bell=$('#opts').rules.value==='bell', c=$('#optBell4');
@@ -1289,15 +1290,20 @@ const Story=(function(){
     let done=0; for(let k=0;k<i;k++)done+=dur(STORY[k]);
     $('#stProg').style.width=(Math.min(100,(done+tt)/total*100)).toFixed(2)+'%';
   }
-  function end(){ card.style.opacity='0'; $('#stEnd').classList.add('on'); $('#stProg').style.width='100%'; paused=true; $('#stPause').textContent='Pausa'; $('#stAgain').focus(); }
+  /* schermo sempre acceso durante la storia, come in un video; rilasciato alla fine o alla chiusura */
+  let wl=null;
+  async function lock(){ try{ if('wakeLock' in navigator&&!wl&&!document.hidden){ const l=await navigator.wakeLock.request('screen'); if(!running||$('#stEnd').classList.contains('on')){l.release();return;} wl=l; l.addEventListener('release',()=>{if(wl===l)wl=null;}); } }catch(e){} }
+  function unlock(){ try{ if(wl){const l=wl;wl=null;l.release();} }catch(e){} }
+  document.addEventListener('visibilitychange',()=>{ if(running&&!document.hidden&&!$('#stEnd').classList.contains('on'))lock(); });
+  function end(){ unlock(); card.style.opacity='0'; $('#stEnd').classList.add('on'); $('#stProg').style.width='100%'; paused=true; $('#stPause').textContent='Pausa'; $('#stAgain').focus(); }
   function open(){
     opener=document.activeElement; el.hidden=false; document.body.style.overflow='hidden';
     AU.unlock(); resize(); mkParts(); paused=false; $('#stPause').textContent='Pausa'; syncStMus(); show(0);
-    running=true; last=performance.now(); raf=requestAnimationFrame(frame); $('#stPause').focus();
+    running=true; last=performance.now(); raf=requestAnimationFrame(frame); $('#stPause').focus(); lock();
   }
-  function close(){ running=false; cancelAnimationFrame(raf); el.hidden=true; document.body.style.overflow=''; if(opener&&opener.focus)opener.focus(); }
+  function close(){ running=false; unlock(); cancelAnimationFrame(raf); el.hidden=true; document.body.style.overflow=''; if(opener&&opener.focus)opener.focus(); }
   function pause(){ if($('#stEnd').classList.contains('on'))return; paused=!paused; $('#stPause').textContent=paused?'Riprendi':'Pausa'; }
-  function go(n){ paused=false; $('#stPause').textContent='Pausa'; show(Math.max(0,Math.min(STORY.length-1,n))); }
+  function go(n){ paused=false; if(running)lock(); $('#stPause').textContent='Pausa'; show(Math.max(0,Math.min(STORY.length-1,n))); }
   addEventListener('resize',()=>{if(running){resize();mkParts();}});
   document.addEventListener('keydown',e=>{
     if(el.hidden)return;
