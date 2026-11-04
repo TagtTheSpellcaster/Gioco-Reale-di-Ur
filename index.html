@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  Gioco Reale di Ur v1.5
+  Gioco Reale di Ur v1.6
   Copyright (C) 2026 Alessandro Valli
   SPDX-License-Identifier: AGPL-3.0-or-later
 -->
@@ -8,12 +8,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Il Gioco Reale di Ur nel browser: regole Finkel e Bell, dadi 3D, audio e storia.">
+<meta name="description" content="Il Gioco Reale di Ur nel browser: regole Finkel e Bell, dadi 3D, audio e storia. Italiano e inglese. / The Royal Game of Ur in the browser: Finkel and Bell rules, 3D dice, audio and story. Italian and English.">
 <title>Gioco Reale di Ur</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Alegreya+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&family=Marcellus&display=swap" rel="stylesheet">
 <style>
+.lang{display:inline-flex;border:1.5px solid var(--fg);border-radius:8px;overflow:hidden}
+.lang button{font:700 14px var(--font-mono);letter-spacing:.06em;padding:0 12px;min-height:44px;background:transparent;color:var(--fg);border:0;cursor:pointer}
+.lang button+button{border-left:1.5px solid var(--fg)}
+.lang button[aria-pressed="true"]{background:var(--fg);color:var(--bg)}
+
 /* Layout: il tavoliere occupa tutta la larghezza; sotto, pannello di gioco e punteggi affiancati; poi impostazioni e cronaca; regole in fondo. Il tavoliere è un oggetto a sé: guscio, lapislazzuli, bitume e pietra rossa, uguale nei due temi. */
 :root{
   --bg:#dde1e4; --surface:#eceeef; --fg:#1c242c; --muted:#55616c; --line:#b9c1c8;
@@ -226,14 +231,12 @@ details.rules summary{cursor:pointer;font:400 21px var(--font-display);letter-sp
   .stage .pcard{padding:10px 14px}
 }
 </style>
-</head>
-<body>
 
 <main class="wrap">
   <header class="top">
     <h1>Gioco Reale di Ur</h1>
-    <p class="sub"><span class="ver">v1.5</span> · Tavoliere dalla necropoli reale di Ur, circa 2600 a.C. Cinque o sette pedine a testa, quattordici caselle di percorso.</p>
-    <div class="hbtns"><button type="button" class="btn alt" id="storyBtn">Avvia la storia</button><button type="button" class="btn alt" id="tutBtn">Regole illustrate</button></div>
+    <p class="sub"><span class="ver">v1.6</span> · Tavoliere dalla necropoli reale di Ur, circa 2600 a.C. Cinque o sette pedine a testa, quattordici caselle di percorso.</p>
+    <div class="hbtns"><div class="lang" id="langSeg" role="group" aria-label="Lingua / Language"><button type="button" data-lang="it" aria-pressed="true">IT</button><button type="button" data-lang="en" aria-pressed="false">EN</button></div><button type="button" class="btn alt" id="storyBtn">Avvia la storia</button><button type="button" class="btn alt" id="tutBtn">Regole illustrate</button></div>
   </header>
 
   <div class="stage">
@@ -257,11 +260,11 @@ details.rules summary{cursor:pointer;font:400 21px var(--font-display);letter-sp
       <div class="dice-row">
         <canvas id="diceCanvas" width="400" height="130" aria-hidden="true"></canvas>
         <div class="dice idle" id="dice" aria-hidden="true" hidden></div>
-        <div class="result"><span class="big" id="big">–</span><span class="cap" id="capt">in attesa del primo lancio</span></div>
+        <div class="result"><span class="big" id="big" data-dyn>–</span><span class="cap" id="capt" data-dyn>in attesa del primo lancio</span></div>
       </div>
       <p class="status" id="status"></p>
       <div class="actions">
-        <button type="button" class="btn" id="rollBtn">Tira i dadi</button>
+        <button type="button" class="btn" id="rollBtn" data-dyn>Tira i dadi</button>
         <button type="button" class="btn alt" id="againBtn" hidden>Nuova partita</button>
       </div>
     </div>
@@ -363,9 +366,9 @@ details.rules summary{cursor:pointer;font:400 21px var(--font-display);letter-sp
   <div class="st-end" id="stEnd"><button type="button" id="stAgain">Rivedi la storia</button><button type="button" id="stBack">Torna al gioco</button></div>
   <div class="st-ui">
     <button type="button" id="stPrev">‹ Indietro</button>
-    <button type="button" id="stPause">Pausa</button>
+    <button type="button" id="stPause" data-dyn>Pausa</button>
     <button type="button" id="stNext">Avanti ›</button>
-    <button type="button" id="stMus">Colonna sonora: no</button>
+    <button type="button" id="stMus" data-dyn>Colonna sonora: no</button>
     <button type="button" id="stClose">Chiudi</button>
   </div>
   <div class="st-prog" id="stProg"></div>
@@ -396,8 +399,18 @@ details.rules summary{cursor:pointer;font:400 21px var(--font-display);letter-sp
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
+var LANGKEY='ur-lang';
+var LANG=(function(){try{var v=localStorage.getItem(LANGKEY);if(v==='it'||v==='en')return v;}catch(e){}return /^it/i.test(navigator.language||'')?'it':'en';})();
+function _(it,en){return LANG==='en'?en:it;}
+var GAME_TITLE={it:'Gioco Reale di Ur',en:'Royal Game of Ur'};
+document.title=GAME_TITLE[LANG];
+document.documentElement.lang=LANG;
+
+</script>
+<script>
 /*ENGINE_START*/
-const NAMES = ['Blu', 'Rosso'];
+if (typeof _ === 'undefined') { var _ = (it) => it; }
+const NAMES = [_('Blu', 'Blue'), _('Rosso', 'Red')];
 const OFF = 15;
 const ROSETTES = [4, 8, 14];
 const BELL_STEPS = { 3: 5, 0: 4, 2: 1, 1: 0 };
@@ -416,20 +429,21 @@ function rollDice(st, rng) { const d = []; for (let i = 0; i < nDice(st); i++) d
 const stepsFor = (st, w) => (st.rules === 'bell' ? BELL_STEPS[w] : w);
 
 function describeRoll(st, w, enter) {
-  const white = w + ' ' + (w === 1 ? 'vertice bianco' : 'vertici bianchi');
+  const white = w + ' ' + (w === 1 ? _('vertice bianco', 'white vertex') : _('vertici bianchi', 'white vertices'));
+  const stp = n => n + ' ' + (n === 1 ? _('casella', 'square') : _('caselle', 'squares'));
   if (st.rules === 'finkel') {
     return w === 0
-      ? { head: 'Nessun vertice bianco', text: 'Nessun movimento: il turno passa.' }
-      : { head: white, text: 'Avanza di ' + w + (w === 1 ? ' casella' : ' caselle') + ' o immetti una pedina in casella ' + w + '.' };
+      ? { head: _('Nessun vertice bianco', 'No white vertices'), text: _('Nessun movimento: il turno passa.', 'No movement: the turn passes.') }
+      : { head: white, text: _('Avanza di ' + stp(w) + ' o immetti una pedina in casella ' + w + '.', 'Advance ' + stp(w) + ' or enter a piece on square ' + w + '.') };
   }
   const s = BELL_STEPS[w];
   if (enter) {
-    return { head: w === 0 ? '3 vertici neri' : white, text: s === 0 ? 'La nuova pedina viene ritirata dal gioco.' : 'La nuova pedina avanza di ' + s + (s === 1 ? ' casella.' : ' caselle.') };
+    return { head: w === 0 ? _('3 vertici neri', '3 black vertices') : white, text: s === 0 ? _('La nuova pedina viene ritirata dal gioco.', 'The new piece is withdrawn from the game.') : _('La nuova pedina avanza di ' + stp(s) + '.', 'The new piece advances ' + stp(s) + '.') };
   }
-  if (w === 3) return { head: white, text: 'Immetti una pedina e rilancia, oppure avanza di 5 caselle.' };
-  if (w === 0) return { head: '3 vertici neri', text: 'Avanza di 4 caselle e rilancia.' };
-  if (w === 2) return { head: white, text: 'Avanza di 1 casella e rilancia.' };
-  return { head: white, text: 'Il turno passa senza rilancio.' };
+  if (w === 3) return { head: white, text: _('Immetti una pedina e rilancia, oppure avanza di 5 caselle.', 'Enter a piece and roll again, or advance 5 squares.') };
+  if (w === 0) return { head: _('3 vertici neri', '3 black vertices'), text: _('Avanza di 4 caselle e rilancia.', 'Advance 4 squares and roll again.') };
+  if (w === 2) return { head: white, text: _('Avanza di 1 casella e rilancia.', 'Advance 1 square and roll again.') };
+  return { head: white, text: _('Il turno passa senza rilancio.', 'The turn passes without a new roll.') };
 }
 
 function ownAt(st, p, s) { return st.pieces.find(x => x.owner === p && x.pos === s) || null; }
@@ -488,16 +502,16 @@ function endTurn(st) {
 
 function landing(st, p, pc, r, ev) {
   let bonus = false;
-  if (r.cap) { r.cap.pos = 0; ev.push({ p, msg: NAMES[p] + ' cattura una pedina di ' + NAMES[1 - p] + ' in casella ' + r.to + '.' }); }
-  if (r.shifted) ev.push({ p, msg: 'La rosetta centrale è occupata: la pedina prosegue in casella ' + r.to + '.' });
+  if (r.cap) { r.cap.pos = 0; ev.push({ p, msg: _(NAMES[p] + ' cattura una pedina di ' + NAMES[1 - p] + ' in casella ' + r.to + '.', NAMES[p] + ' captures a piece of ' + NAMES[1 - p] + ' on square ' + r.to + '.') }); }
+  if (r.shifted) ev.push({ p, msg: _('La rosetta centrale è occupata: la pedina prosegue in casella ' + r.to + '.', 'The central rosette is occupied: the piece goes on to square ' + r.to + '.') });
   pc.pos = r.to;
   if (ROSETTES.includes(r.to) && !r.shifted) {
     if (st.rules === 'bell') {
       st.pot++; st.paid[1 - p]++;
-      ev.push({ p, msg: NAMES[1 - p] + ' paga la posta al banco (rosetta).' });
+      ev.push({ p, msg: _(NAMES[1 - p] + ' paga la posta al banco (rosetta).', NAMES[1 - p] + ' pays the stake to the bank (rosette).') });
     } else {
       bonus = true;
-      ev.push({ p, msg: NAMES[p] + ' ottiene un nuovo lancio (rosetta).' });
+      ev.push({ p, msg: _(NAMES[p] + ' ottiene un nuovo lancio (rosetta).', NAMES[p] + ' gets another roll (rosette).') });
     }
   }
   return bonus;
@@ -508,15 +522,15 @@ function resolveEnterRoll(st, w, ev) {
   st.enterId = null;
   if (steps === 0) {
     pc.pos = 0;
-    ev.push({ p, msg: NAMES[p] + ': la nuova pedina viene ritirata dal gioco.' });
+    ev.push({ p, msg: _(NAMES[p] + ': la nuova pedina viene ritirata dal gioco.', NAMES[p] + ': the new piece is withdrawn from the game.') });
     endTurn(st); return;
   }
   const r = resolve(st, p, 1 + steps);
   if (!r) {
-    ev.push({ p, msg: NAMES[p] + ': casella occupata, la nuova pedina resta in casella 1.' });
+    ev.push({ p, msg: _(NAMES[p] + ': casella occupata, la nuova pedina resta in casella 1.', NAMES[p] + ': square occupied, the new piece stays on square 1.') });
     endTurn(st); return;
   }
-  ev.push({ p, msg: NAMES[p] + ' muove la nuova pedina in casella ' + r.to + '.' });
+  ev.push({ p, msg: _(NAMES[p] + ' muove la nuova pedina in casella ' + r.to + '.', NAMES[p] + ' moves the new piece to square ' + r.to + '.') });
   landing(st, p, pc, r, ev);
   endTurn(st);
 }
@@ -533,7 +547,7 @@ function applyRoll(st, dice) {
   }
   st.moves = genMoves(st, w);
   if (!st.moves.length) {
-    ev.push({ p, msg: NAMES[p] + ': nessuna mossa possibile, il turno passa.' });
+    ev.push({ p, msg: _(NAMES[p] + ': nessuna mossa possibile, il turno passa.', NAMES[p] + ': no move possible, the turn passes.') });
     endTurn(st); info.status = 'pass';
   } else {
     st.phase = 'move'; info.status = 'move';
@@ -547,28 +561,28 @@ function applyMove(st, m) {
   if (m.kind === 'exit') {
     pc.pos = OFF;
     const n = st.pieces.filter(x => x.owner === p && x.pos === OFF).length;
-    ev.push({ p, msg: NAMES[p] + ' porta in salvo una pedina (' + n + '/' + st.n + ').' });
+    ev.push({ p, msg: _(NAMES[p] + ' porta in salvo una pedina (' + n + '/' + st.n + ').', NAMES[p] + ' brings a piece to safety (' + n + '/' + st.n + ').') });
   } else {
     const r = { to: m.to, shifted: m.shifted, cap: m.cap != null ? st.pieces[m.cap] : null };
-    if (m.kind === 'enter') ev.push({ p, msg: NAMES[p] + ' immette una pedina in casella ' + m.to + '.' });
-    else if (m.kind === 'bounce') ev.push({ p, msg: NAMES[p] + ' rimbalza: la pedina in casella ' + m.from + ' avanza di ' + m.fwd + ' e torna indietro di ' + m.back + ', in casella ' + m.to + '.' });
-    else ev.push({ p, msg: NAMES[p] + ' muove dalla casella ' + m.from + ' alla ' + m.to + '.' });
+    if (m.kind === 'enter') ev.push({ p, msg: _(NAMES[p] + ' immette una pedina in casella ' + m.to + '.', NAMES[p] + ' enters a piece on square ' + m.to + '.') });
+    else if (m.kind === 'bounce') ev.push({ p, msg: _(NAMES[p] + ' rimbalza: la pedina in casella ' + m.from + ' avanza di ' + m.fwd + ' e torna indietro di ' + m.back + ', in casella ' + m.to + '.', NAMES[p] + ' bounces: the piece on square ' + m.from + ' advances ' + m.fwd + ' and goes back ' + m.back + ', to square ' + m.to + '.') });
+    else ev.push({ p, msg: _(NAMES[p] + ' muove dalla casella ' + m.from + ' alla ' + m.to + '.', NAMES[p] + ' moves from square ' + m.from + ' to ' + m.to + '.') });
     bonus = landing(st, p, pc, r, ev);
   }
   if (st.pieces.filter(x => x.owner === p && x.pos === OFF).length === st.n) {
     st.phase = 'over'; st.winner = p; st.moves = [];
-    ev.push({ p, msg: NAMES[p] + ' vince la partita' + (bell && st.pot ? ' e si aggiudica il banco: ' + st.pot + (st.pot === 1 ? ' gettone.' : ' gettoni.') : '.') });
+    ev.push({ p, msg: _(NAMES[p] + ' vince la partita' + (bell && st.pot ? ' e si aggiudica il banco: ' + st.pot + (st.pot === 1 ? ' gettone.' : ' gettoni.') : '.'), NAMES[p] + ' wins the game' + (bell && st.pot ? ' and takes the bank: ' + st.pot + (st.pot === 1 ? ' token.' : ' tokens.') : '.')) });
     return ev;
   }
   if (bell && m.kind === 'enter') {
     st.enterId = pc.id; st.phase = 'roll'; st.moves = []; st.again = true;
-    ev.push({ p, msg: NAMES[p] + ' rilancia per muovere la nuova pedina.' });
+    ev.push({ p, msg: _(NAMES[p] + ' rilancia per muovere la nuova pedina.', NAMES[p] + ' rolls again to move the new piece.') });
     return ev;
   }
   if (bell && (w === 0 || w === 2)) bonus = true;
   if (bonus) {
     st.phase = 'roll'; st.moves = []; st.again = true;
-    if (bell) ev.push({ p, msg: NAMES[p] + ' rilancia i dadi.' });
+    if (bell) ev.push({ p, msg: _(NAMES[p] + ' rilancia i dadi.', NAMES[p] + ' rolls the dice again.') });
   } else endTurn(st);
   return ev;
 }
@@ -610,6 +624,39 @@ function cpuChoose(st, rng) {
 (function(){
 'use strict';
 const $=(s,r)=>(r||document).querySelector(s);
+/* ===== lingua: selettore IT/EN, traduzione dell'interfaccia statica, ganci per i testi dinamici ===== */
+const langHooks=[];
+const I18N_EN={"Gioco Reale di Ur": "Royal Game of Ur", "<span class=\"ver\">v1.6<\/span> · Tavoliere dalla necropoli reale di Ur, circa 2600 a.C. Cinque o sette pedine a testa, quattordici caselle di percorso.": "<span class=\"ver\">v1.6<\/span> · Board from the royal necropolis of Ur, around 2600 BC. Five or seven pieces each, fourteen squares of route.", "Avvia la storia": "Start the story", "Regole illustrate": "Illustrated rules", "Tavoliere del Gioco Reale di Ur": "Board of the Royal Game of Ur", "Nuova partita": "New game", "Banco": "Bank", "Impostazioni": "Settings", "Regole": "Rules", "Finkel · 4 dadi": "Finkel · 4 dice", "Bell · 3 dadi": "Bell · 3 dice", "Avversario": "Opponent", "Computer": "Computer", "Due giocatori": "Two players", "Pedine a testa": "Pieces each", "7 · regole moderne": "7 · modern rules", "5 · tavoletta di Finkel": "5 · Finkel's tablet", "Varianti": "Variants", "Regola del rimbalzo<small>Se l'unica pedina mobile è quella in uscita, avanza fino all'uscita e torna indietro del resto.<\/small>": "Bounce rule<small>If the only movable piece is the one about to leave, it advances to the exit and goes back by the remainder.<\/small>", "Uscita con tiro da quattro punti<small>Solo Bell: una pedina esce solo con tre vertici neri.<\/small>": "Exit with a roll of four points<small>Bell only: a piece leaves only with three black vertices.<\/small>", "Numera le caselle del percorso": "Number the squares of the route", "Audio": "Audio", "Effetti sonori": "Sound effects", "Colonna sonora<small>Musica d'ambiente di ispirazione mesopotamica, generata dal browser. Vale anche per la storia.<\/small>": "Soundtrack<small>Ambient music inspired by Mesopotamia, generated by the browser. It also applies to the story.<\/small>", "Cronaca": "Log", "Regole e interpretazioni adottate": "Rules and interpretations adopted", "Scopo": "Goal", "Portare in salvo tutte e sette le proprie pedine prima dell'avversario. Ogni giocatore percorre quattordici caselle: quattro nella propria corsia, otto nella corsia centrale comune, due nella propria corsia finale. Le rosette sono alle caselle 4, 8 e 14.": "Bring all seven of your pieces to safety before the opponent. Each player covers fourteen squares: four in their own lane, eight in the shared central lane, two in their own final lane. The rosettes are on squares 4, 8 and 14.", "Finkel": "Finkel", "Quattro dadi: il numero di vertici bianchi è il movimento. Zero vertici bianchi: si passa.": "Four dice: the number of white vertices is the movement. Zero white vertices: you pass.", "Si immette una pedina oppure si avanza di altrettante caselle. Si possono saltare le pedine, non fermarsi su una propria.": "You enter a piece or advance by that many squares. You may jump over pieces, but not stop on one of your own.", "Chi termina su una pedina avversaria la manda a ripartire.": "Whoever ends on an opposing piece sends it back to start over.", "Chi termina su una rosetta rilancia i dadi.": "Whoever ends on a rosette rolls the dice again.", "Uscita con tiro esatto: dalla casella 14 serve un 1.": "Exit with an exact roll: from square 14 a 1 is needed.", "Bell": "Bell", "Tre dadi. Tre bianchi: immetti una pedina e rilancia, oppure avanza di 5. Tre neri: avanza di 4 e rilancia. Due bianchi: avanza di 1 e rilancia. Un bianco: si passa.": "Three dice. Three white: enter a piece and roll again, or advance 5. Three black: advance 4 and roll again. Two white: advance 1 and roll again. One white: you pass.", "La pedina immessa parte dalla casella 1 e il rilancio la muove di 5, 4 o 1 caselle; con un bianco viene ritirata.": "The piece entered starts from square 1 and the extra roll moves it 5, 4 or 1 squares; with one white it is withdrawn.", "Chi termina su una rosetta fa pagare una posta all'avversario. Chi vince prende il banco.": "Whoever ends on a rosette makes the opponent pay a stake. The winner takes the bank.", "Interpretazioni adottate": "Interpretations adopted", "Finkel, rosetta occupata: la regola riguarda la rosetta centrale (casella 8), le altre sono in corsie private. La pedina prosegue alla casella 9; se lì c'è una pedina avversaria la cattura, se ce n'è una propria la mossa non è consentita.": "Finkel, occupied rosette: the rule concerns the central rosette (square 8); the others are in private lanes. The piece goes on to square 9; if an opposing piece is there it is captured, if one of your own is there the move is not allowed.", "Bell: le rosette non proteggono le pedine e la posta è di un gettone. Se la casella d'arrivo della pedina appena immessa è occupata da una propria pedina, resta in casella 1. Dopo il suo rilancio il turno passa.": "Bell: the rosettes do not protect pieces and the stake is one token. If the arrival square of the piece just entered is occupied by one of your own pieces, it stays on square 1. After its extra roll the turn passes.", "Rimbalzo: si applica solo se non esiste nessun'altra mossa, compresa l'immissione, e non se la pedina tornerebbe dov'era.": "Bounce: it applies only if no other move exists, entering included, and not if the piece would return to where it was.", "Uscita con quattro punti (Bell): con tre vertici neri esce una pedina che raggiunge o supera l'ultima casella. Con gli altri tiri non si esce.": "Exit with four points (Bell): with three black vertices a piece that reaches or passes the last square leaves. With other rolls it does not leave.", "Non incluse: le varianti a 16 caselle e allungata, di cui lo schema non è disponibile.": "Not included: the 16-square and elongated variants, for which the layout is not available.", "Compatibilità con le fonti storiche": "Consistency with the historical sources", "Tavoliere: venti caselle, due quadranti (4×3 e 2×3) uniti da un ponte di 1×2, cinque rosette. Corrisponde alle tavole del III millennio a.C.": "Board: twenty squares, two blocks (4×3 and 2×3) joined by a 1×2 bridge, five rosettes. It matches the boards of the 3rd millennium BC.", "Percorso: corsie private nel quadrante grande, corsia centrale e ponte contesi, svolta nel quadrante piccolo. È il percorso ricostruito da Finkel. Il percorso più lungo di Murray non è incluso.": "Route: private lanes in the large block, central lane and bridge contested, turn in the small block. This is the route reconstructed by Finkel. Murray's longer route is not included.", "Pedine: le fonti ne riportano cinque o sette. Cinque è il numero della tavoletta analizzata da Finkel, sette quello delle regole moderne: la scelta è nelle impostazioni.": "Pieces: the sources report five or seven. Five is the number on the tablet analysed by Finkel, seven that of the modern rules: the choice is in the settings.", "Dadi: tetraedrici, con vertici marcati. Finkel e Bell usano rispettivamente quattro e tre dadi.": "Dice: tetrahedral, with marked vertices. Finkel and Bell use four and three dice respectively.", "Rosette: nella ricostruzione citata dall'articolo chi le salta paga una posta, chi le occupa la ritira, e la pedina che vi si trova non può essere catturata. Qui valgono le regole moderne di Finkel (nuovo lancio) e di Bell (posta pagata dall'avversario). Sono due letture diverse delle stesse fonti.": "Rosettes: in the reconstruction cited by the article, whoever jumps over them pays a stake, whoever occupies them withdraws it, and the piece standing on one cannot be captured. Here the modern rules of Finkel (extra roll) and of Bell (stake paid by the opponent) apply. They are two different readings of the same sources.", "Le regole originali sono sconosciute: tutte le versioni sono ricostruzioni.": "The original rules are unknown: all versions are reconstructions.", "La storia del Gioco Reale di Ur": "The story of the Royal Game of Ur", "Rivedi la storia": "Replay the story", "Torna al gioco": "Back to the game", "‹ Indietro": "‹ Back", "Avanti ›": "Next ›", "Chiudi": "Close", "Set di regole": "Rule set", "Indietro": "Back", "Riproduci": "Replay", "Avanti": "Next"};
+const i18nUnits=[];
+(function(){
+  const INL=/^(B|I|EM|STRONG|SMALL|SPAN|CODE|BR|A|SUB|SUP|U)$/i;
+  const walk=el=>{
+    if(el.nodeType!==1||el.hasAttribute('data-dyn'))return;
+    ['aria-label','title'].forEach(a=>{if(el.hasAttribute(a))i18nUnits.push({el,attr:a,it:el.getAttribute(a)});});
+    if(/^(SCRIPT|STYLE|SVG|CANVAS|NOSCRIPT)$/i.test(el.tagName))return;
+    let hasText=false,allInline=true;
+    el.childNodes.forEach(n=>{if(n.nodeType===3&&n.nodeValue.trim())hasText=true;else if(n.nodeType===1&&!INL.test(n.tagName))allInline=false;});
+    if(hasText&&allInline){i18nUnits.push({el,attr:null,it:el.innerHTML.trim()});return;}
+    el.childNodes.forEach(walk);
+  };
+  walk(document.body);
+})();
+window.__i18nKeys=i18nUnits.map(u=>u.it);
+function i18nApply(){
+  i18nUnits.forEach(u=>{
+    const v=LANG==='en'&&I18N_EN[u.it]!=null?I18N_EN[u.it]:u.it;
+    if(u.attr)u.el.setAttribute(u.attr,v); else if(u.el.innerHTML.trim()!==v)u.el.innerHTML=v;
+  });
+  document.querySelectorAll('#langSeg button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lang===LANG?'true':'false'));
+  document.documentElement.lang=LANG; document.title=GAME_TITLE[LANG];
+}
+function setLang(l){
+  if(l!=='it'&&l!=='en')return; LANG=l; try{localStorage.setItem(LANGKEY,l);}catch(e){}
+  i18nApply(); langHooks.forEach(f=>{try{f();}catch(e){console.error("hook",e)}});
+}
+document.querySelectorAll('#langSeg button').forEach(b=>b.addEventListener('click',()=>setLang(b.dataset.lang)));
+i18nApply();
+
 const NS='http://www.w3.org/2000/svg';
 const XS=[118,2481,4843,7206,9568,11931,14293,16656], YS=[118,2481,4843], HALF=1063;
 const cellOf=(p,s)=>{const row=p===0?0:2; if(s<=4)return{c:3+s,r:row}; if(s<=12)return{c:12-s,r:1}; return{c:s-13,r:row};};
@@ -729,7 +776,7 @@ function boardLayers(){
   L.nums=n;
   let l='';
   [[0,330],[1,6930]].forEach(a=>{
-    l+='<text class="lbl" text-anchor="middle" x="5906" y="'+a[1]+'">In salvo</text><text class="lbl" text-anchor="middle" x="8269" y="'+a[1]+'">Da giocare</text>';
+    l+='<text class="lbl" text-anchor="middle" x="5906" y="'+a[1]+'" data-bl="0">'+_('In salvo','Safe')+'</text><text class="lbl" text-anchor="middle" x="8269" y="'+a[1]+'" data-bl="1">'+_('Da giocare','To play')+'</text>';
   });
   L.lbls=l;
   return L;
@@ -948,6 +995,8 @@ function render(){
   }
   panels();
 }
+let captRoll=null;
+function setCapt(){$('#capt').textContent=captRoll?describeRoll({rules:captRoll.rules},captRoll.w,captRoll.enter).head.toLowerCase():_('in attesa del primo lancio','waiting for the first roll');}
 function moveFor(pc){
   if(st.phase!=='move'||pc.owner!==st.turn)return -1;
   let i=st.moves.findIndex(m=>m.id===pc.id); if(i>=0)return i;
@@ -955,9 +1004,9 @@ function moveFor(pc){
   return -1;
 }
 function moveLabel(m){
-  if(m.kind==='exit')return 'Porta in salvo la pedina in casella '+m.from;
-  if(m.kind==='enter')return 'Immetti una pedina in casella '+m.to;
-  return 'Pedina in casella '+m.from+', muovi alla '+m.to+(m.cap!=null?' e cattura':'');
+  if(m.kind==='exit')return _('Porta in salvo la pedina in casella '+m.from,'Bring the piece on square '+m.from+' to safety');
+  if(m.kind==='enter')return _('Immetti una pedina in casella '+m.to,'Enter a piece on square '+m.to);
+  return _('Pedina in casella '+m.from+', muovi alla '+m.to+(m.cap!=null?' e cattura':''),'Piece on square '+m.from+', move to '+m.to+(m.cap!=null?' and capture':''));
 }
 
 function panels(){
@@ -967,33 +1016,33 @@ function panels(){
     let m='';for(let i=0;i<st.n;i++)m+='<i class="'+(i<off?'on':'')+'"></i>';
     const el=$('#pc'+p);
     el.className='pcard'+(st.turn===p&&st.phase!=='over'?' active':'');
-    el.innerHTML='<span class="sw p'+p+'"></span><div class="pname">'+NAMES[p]+'<span class="tag">'+(p===1&&cpuOn?'computer':'giocatore')+'</span></div>'
+    el.innerHTML='<span class="sw p'+p+'"></span><div class="pname">'+NAMES[p]+'<span class="tag">'+(p===1&&cpuOn?_('computer','computer'):_('giocatore','player'))+'</span></div>'
       +'<div class="meter" aria-hidden="true">'+m+'</div>'
-      +'<div class="meta">In salvo '+off+'/'+st.n+' · da giocare '+hand+(st.rules==='bell'?' · posta pagata '+st.paid[p]:'')+'</div>';
+      +'<div class="meta">'+_('In salvo ','Safe ')+off+'/'+st.n+_(' · da giocare ',' · to play ')+hand+(st.rules==='bell'?_(' · posta pagata ',' · stake paid ')+st.paid[p]:'')+'</div>';
   }
-  $('#pot').hidden=st.rules!=='bell'; $('#potv').textContent=st.pot+(st.pot===1?' gettone':' gettoni');
+  $('#pot').hidden=st.rules!=='bell'; $('#potv').textContent=st.pot+(st.pot===1?_(' gettone',' token'):_(' gettoni',' tokens'));
   /* stato e pulsanti */
   const over=st.phase==='over';
   $('#againBtn').hidden=!over;
   const canRoll=st.phase==='roll'&&!busy&&!rolling&&!isCpu(st.turn);
   const rb=$('#rollBtn'); rb.hidden=over; rb.disabled=!canRoll;
-  rb.textContent=st.enterId!=null?'Rilancia per la nuova pedina':(st.again?'Tira ancora':'Tira i dadi');
+  rb.textContent=st.enterId!=null?_('Rilancia per la nuova pedina','Roll again for the new piece'):(st.again?_('Tira ancora','Roll again'):_('Tira i dadi','Roll the dice'));
   $('#status').innerHTML=statusHTML();
 }
 function statusHTML(){
   const p=st.turn, N='<b>'+NAMES[p]+'</b>';
-  if(st.phase==='over')return '<b>'+NAMES[st.winner]+' vince.</b> Ha portato in salvo tutte le '+st.n+' pedine'+(st.rules==='bell'&&st.pot?' e si aggiudica il banco di '+st.pot+(st.pot===1?' gettone.':' gettoni.'):'.');
-  if(rolling)return 'Tiro dei dadi…';
-  if(note)return note;
+  if(st.phase==='over')return _('<b>'+NAMES[st.winner]+' vince.</b> Ha portato in salvo tutte le '+st.n+' pedine'+(st.rules==='bell'&&st.pot?' e si aggiudica il banco di '+st.pot+(st.pot===1?' gettone.':' gettoni.'):'.'),'<b>'+NAMES[st.winner]+' wins.</b> All '+st.n+' pieces are safe'+(st.rules==='bell'&&st.pot?' and the bank of '+st.pot+(st.pot===1?' token':' tokens')+' is won.':'.'));
+  if(rolling)return _('Tiro dei dadi…','Rolling the dice…');
+  if(note)return typeof note==='function'?note():note;
   if(st.phase==='move'){
     const d=describeRoll(st,st.roll.w,false);
-    if(isCpu(p))return N+' (computer) sceglie la mossa. '+d.head+'.';
-    if(selected!=null){const m=st.moves[selected];return d.head+'. '+moveLabel(m)+'. Tocca di nuovo la pedina o la casella tratteggiata per confermare.';}
-    return d.head+'. '+d.text+' Tocca una pedina evidenziata.';
+    if(isCpu(p))return N+_(' (computer) sceglie la mossa. ',' (computer) chooses a move. ')+d.head+'.';
+    if(selected!=null){const m=st.moves[selected];return d.head+'. '+moveLabel(m)+_('. Tocca di nuovo la pedina o la casella tratteggiata per confermare.','. Tap the piece or the dashed square again to confirm.');}
+    return d.head+'. '+d.text+_(' Tocca una pedina evidenziata.',' Tap a highlighted piece.');
   }
-  if(isCpu(p))return N+' (computer) tira i dadi…';
-  if(st.enterId!=null)return N+': tira i dadi per muovere la nuova pedina.';
-  return (st.again?N+' ha diritto a un altro lancio.':'Tocca a '+N+'.')+' Tira i dadi.';
+  if(isCpu(p))return N+_(' (computer) tira i dadi…',' (computer) rolls the dice…');
+  if(st.enterId!=null)return N+_(': tira i dadi per muovere la nuova pedina.',': roll the dice to move the new piece.');
+  return (st.again?N+_(' ha diritto a un altro lancio.',' has another roll.'):_('Tocca a '+N+'.',N+' to play.'))+_(' Tira i dadi.',' Roll the dice.');
 }
 
 /* flusso */
@@ -1014,14 +1063,14 @@ function doRoll(){
     const enter=st.enterId!=null, snap=snapshot();
     const info=applyRoll(st,dice); lastRoll=info;
     const d=describeRoll({rules:st.rules},info.w,enter);
-    $('#big').textContent=info.steps; $('#capt').textContent=d.head.toLowerCase();
-    pushLog([{p:info.p,msg:NAMES[info.p]+' tira: '+d.head.toLowerCase()+'.'}].concat(info.ev));
+    $('#big').textContent=info.steps; captRoll={rules:st.rules,w:info.w,enter}; setCapt();
+    pushLog([{p:info.p,msg:_(NAMES[info.p]+' tira: '+d.head.toLowerCase()+'.',NAMES[info.p]+' rolls: '+d.head.toLowerCase()+'.')}].concat(info.ev));
     if(info.status==='move'){
       busy=false; render();
       if(isCpu(st.turn))later(cpuMove,1000);
     } else {
       busy=true;
-      if(info.status==='pass'){note=d.head+'. Nessuna mossa possibile: il turno passa.';AU.pass();} else note=d.head+'. '+d.text;
+      if(info.status==='pass'){note=()=>describeRoll({rules:captRoll.rules},captRoll.w,enter).head+_('. Nessuna mossa possibile: il turno passa.','. No move possible: the turn passes.');AU.pass();} else note=()=>{const dd=describeRoll({rules:captRoll.rules},captRoll.w,enter);return dd.head+'. '+dd.text;};
       const pr=animateChanges(snap); render();
       await pr; if(g!==gen)return;
       await wait(info.status==='pass'?1300:900); if(g!==gen)return;
@@ -1068,9 +1117,8 @@ function startGame(){
   let a,b,msg;
   do{a=rollDice(st,Math.random).filter(Boolean).length;b=rollDice(st,Math.random).filter(Boolean).length;}while(a===b);
   st.turn=a>b?0:1;
-  const T=(rules==='bell'?'vertici bianchi':'vertici bianchi');
-  pushLog([{msg:'Tiro d\'apertura: Blu '+a+', Rosso '+b+' ('+T+'). Inizia '+NAMES[st.turn]+'.'}]);
-  setDiceOwner(st.turn); showDice(Array.from({length:nDice(st)},()=>Math.random()<.5),true); $('#big').textContent='–'; $('#capt').textContent='in attesa del primo lancio';
+  pushLog([{msg:_('Tiro d\'apertura: Blu '+a+', Rosso '+b+' (vertici bianchi). Inizia '+NAMES[st.turn]+'.','Opening roll: Blue '+a+', Red '+b+' (white vertices). '+NAMES[st.turn]+' starts.')}]);
+  setDiceOwner(st.turn); showDice(Array.from({length:nDice(st)},()=>Math.random()<.5),true); $('#big').textContent='–'; captRoll=null; setCapt();
   next();
 }
 $('#opts').addEventListener('submit',e=>{e.preventDefault();startGame();});
@@ -1219,25 +1267,25 @@ $('#optMusic').addEventListener('change',e=>{AU.setMus(e.target.checked);syncStM
 
 /* ===== Storia ===== */
 const STORY=[
- {t:'Il Gioco Reale di Ur',b:'Una storia in venti caselle',art:'ros'},
- {k:'Mesopotamia · prima metà del III millennio a.C.',b:'Prima degli scacchi, della dama e del go, qualcuno incise venti caselle su una tavola e vi dispose sopra pedine e dadi.'},
- {k:'Ur · 1926–1930',b:'Nel cimitero reale l\'archeologo Leonard Woolley porta alla luce tre tavole complete, i resti di altre due e molte pedine rimaste senza coppia.'},
- {k:'I materiali',b:'Lapislazzuli, corniola, conchiglie. Rosette, occhi, quadranti punteggiati: nessuno sa se quei disegni servissero alle regole o soltanto a ornare la tavola.'},
- {k:'Il nome',b:'Il suo nome antico è perduto. Lo chiamiamo «di Ur» soltanto perché da lì è tornato alla luce.'},
- {k:'La tavola',b:'Dodici caselle da un lato, sei dall\'altro, e un ponte stretto di due. Venti in tutto. Cinque rosette, sempre negli stessi punti.',art:'board'},
- {k:'Shahr-i Sokhta · Iran meridionale',b:'Un\'altra tavola, quasi identica. Le caselle sono disegnate dalle spire di un serpente. Dadi e pedine stavano in un cestino sepolto con il defunto.',art:'snake'},
- {k:'Il gioco viaggia',b:'Anatolia, Cipro, Grecia. Dadi e pedine nella valle dell\'Indo, a Harappa e a Mohenjo-Daro. Nel XIV secolo a.C. il re Tushratta di Mitanni manda al faraone «cinque cani d\'oro e cinque cani d\'argento»: forse i pezzi di un gioco.'},
- {k:'Egitto',b:'Sul Nilo il gioco cambia forma e prende il nome di Tau. Nel 1922 Howard Carter trova quattro tavole nella tomba di Tutankhamon e le crede senet. Un esame successivo le avvicina al Tau, parente del gioco di Ur.'},
- {k:'Khorsabad · fine dell\'VIII secolo a.C.',b:'Nel palazzo reale assiro, una tavola graffiata nella pietra. Forse l\'opera dei soldati di guardia, durante il regno di Sargon II.'},
- {k:'Babilonia · 3 novembre 177 a.C.',b:'Lo scriba Itti-Marduk-balāṭu copia su argilla il regolamento di uno studioso, Iddin-Bēl. È la più antica regola di gioco che conosciamo. Sarà ritrovata nel 1880 tra le rovine della città.',art:'tablet'},
- {k:'«Branco di cani»',b:'Un\'altra tavoletta, distrutta nella prima guerra mondiale ma salvata in fotografia, porta il nome di un gioco: mēlultu, «branco di cani».',art:'tablet'},
- {k:'Cinque uccelli',b:'Nella lettura di Irving Finkel ogni pedina è un uccello: la rondine, l\'uccello della tempesta, il corvo, il gallo, l\'aquila. Ognuno è legato a un aspetto della vita.'},
- {k:'Forse non era soltanto un gioco',b:'Venti caselle, venti domande: tante ne ponevano gli indovini sulle viscere degli animali. Il venti era sacro a Šamaš, il dio del Sole, e la tavola somiglia ai fegati d\'argilla dei Sumeri. Sono ipotesi: mancano le prove.'},
- {k:'Il declino',b:'Con il primo millennio il gioco cede al backgammon, che ne è una variante. Poi arrivano gli scacchi e la dama in Occidente, il go in Oriente. Tra la tarda antichità e l\'Alto Medioevo scompare.'},
- {k:'Cochin · India',b:'Solo gli ebrei di Cochin ne conservano la memoria. Lo chiamano Aasha e giocano con dodici pedine a testa, fino al primo Novecento. Negli anni Cinquanta emigrano in Israele e il gioco si perde di nuovo.'},
- {k:'Oggi',b:'Irving Finkel ricostruisce le regole dalle tavolette. Regala una copia della tavola a Garry Kasparov, che a Mosca sfida il campione francese di scacchi: perde 36 partite e ne vince 29.'},
- {t:'Tocca a te',b:'Sette pedine. Quattordici caselle. Un ponte da contendere.',art:'ros'},
- {k:'Fonti',b:'Voce «Gioco reale di Ur», Wikipedia. Regole: ricostruzioni di Irving Finkel e di Robert C. Bell.',small:true}
+ {t:'Il Gioco Reale di Ur',b:'Una storia in venti caselle',art:'ros',en:{t:"The Royal Game of Ur",b:"A story in twenty squares"}},
+ {k:'Mesopotamia · prima metà del III millennio a.C.',b:'Prima degli scacchi, della dama e del go, qualcuno incise venti caselle su una tavola e vi dispose sopra pedine e dadi.',en:{k:"Mesopotamia · first half of the 3rd millennium BC",b:"Before chess, draughts and go, someone carved twenty squares on a board and set pieces and dice upon it."}},
+ {k:'Ur · 1926–1930',b:'Nel cimitero reale l\'archeologo Leonard Woolley porta alla luce tre tavole complete, i resti di altre due e molte pedine rimaste senza coppia.',en:{k:"Ur · 1926–1930",b:"In the Royal Cemetery the archaeologist Leonard Woolley brings to light three complete boards, the remains of two others and many pieces left without a pair."}},
+ {k:'I materiali',b:'Lapislazzuli, corniola, conchiglie. Rosette, occhi, quadranti punteggiati: nessuno sa se quei disegni servissero alle regole o soltanto a ornare la tavola.',en:{k:"The materials",b:"Lapis lazuli, carnelian, shell. Rosettes, eyes, dotted dials: nobody knows whether those designs served the rules or merely decorated the board."}},
+ {k:'Il nome',b:'Il suo nome antico è perduto. Lo chiamiamo «di Ur» soltanto perché da lì è tornato alla luce.',en:{k:"The name",b:"Its ancient name is lost. We call it «of Ur» only because it was there that it came back to light."}},
+ {k:'La tavola',b:'Dodici caselle da un lato, sei dall\'altro, e un ponte stretto di due. Venti in tutto. Cinque rosette, sempre negli stessi punti.',art:'board',en:{k:"The board",b:"Twelve squares on one side, six on the other, and a narrow bridge of two. Twenty in all. Five rosettes, always in the same places."}},
+ {k:'Shahr-i Sokhta · Iran meridionale',b:'Un\'altra tavola, quasi identica. Le caselle sono disegnate dalle spire di un serpente. Dadi e pedine stavano in un cestino sepolto con il defunto.',art:'snake',en:{k:"Shahr-i Sokhta · southern Iran",b:"Another board, almost identical. The squares are drawn by the coils of a snake. Dice and pieces were in a basket buried with the deceased."}},
+ {k:'Il gioco viaggia',b:'Anatolia, Cipro, Grecia. Dadi e pedine nella valle dell\'Indo, a Harappa e a Mohenjo-Daro. Nel XIV secolo a.C. il re Tushratta di Mitanni manda al faraone «cinque cani d\'oro e cinque cani d\'argento»: forse i pezzi di un gioco.',en:{k:"The game travels",b:"Anatolia, Cyprus, Greece. Dice and pieces in the Indus valley, at Harappa and Mohenjo-Daro. In the 14th century BC King Tushratta of Mitanni sends the pharaoh «five dogs of gold and five dogs of silver»: perhaps the pieces of a game."}},
+ {k:'Egitto',b:'Sul Nilo il gioco cambia forma e prende il nome di Tau. Nel 1922 Howard Carter trova quattro tavole nella tomba di Tutankhamon e le crede senet. Un esame successivo le avvicina al Tau, parente del gioco di Ur.',en:{k:"Egypt",b:"On the Nile the game changes form and takes the name Tau. In 1922 Howard Carter finds four boards in the tomb of Tutankhamun and takes them for senet. A later examination brings them closer to Tau, a relative of the game of Ur."}},
+ {k:'Khorsabad · fine dell\'VIII secolo a.C.',b:'Nel palazzo reale assiro, una tavola graffiata nella pietra. Forse l\'opera dei soldati di guardia, durante il regno di Sargon II.',en:{k:"Khorsabad · end of the 8th century BC",b:"In the Assyrian royal palace, a board scratched into the stone. Perhaps the work of the guards on duty, during the reign of Sargon II."}},
+ {k:'Babilonia · 3 novembre 177 a.C.',b:'Lo scriba Itti-Marduk-balāṭu copia su argilla il regolamento di uno studioso, Iddin-Bēl. È la più antica regola di gioco che conosciamo. Sarà ritrovata nel 1880 tra le rovine della città.',art:'tablet',en:{k:"Babylon · 3 November 177 BC",b:"The scribe Itti-Marduk-balāṭu copies onto clay the rules of a scholar, Iddin-Bēl. It is the oldest set of game rules we know. It will be found in 1880 among the ruins of the city."}},
+ {k:'«Branco di cani»',b:'Un\'altra tavoletta, distrutta nella prima guerra mondiale ma salvata in fotografia, porta il nome di un gioco: mēlultu, «branco di cani».',art:'tablet',en:{k:"«Pack of dogs»",b:"Another tablet, destroyed in the First World War but saved in photographs, bears the name of a game: mēlultu, «pack of dogs»."}},
+ {k:'Cinque uccelli',b:'Nella lettura di Irving Finkel ogni pedina è un uccello: la rondine, l\'uccello della tempesta, il corvo, il gallo, l\'aquila. Ognuno è legato a un aspetto della vita.',en:{k:"Five birds",b:"In Irving Finkel's reading each piece is a bird: the swallow, the storm bird, the raven, the rooster, the eagle. Each is tied to an aspect of life."}},
+ {k:'Forse non era soltanto un gioco',b:'Venti caselle, venti domande: tante ne ponevano gli indovini sulle viscere degli animali. Il venti era sacro a Šamaš, il dio del Sole, e la tavola somiglia ai fegati d\'argilla dei Sumeri. Sono ipotesi: mancano le prove.',en:{k:"Perhaps not only a game",b:"Twenty squares, twenty questions: as many as diviners asked of the entrails of animals. Twenty was sacred to Šamaš, the Sun god, and the board resembles the Sumerian clay livers. These are hypotheses: proof is lacking."}},
+ {k:'Il declino',b:'Con il primo millennio il gioco cede al backgammon, che ne è una variante. Poi arrivano gli scacchi e la dama in Occidente, il go in Oriente. Tra la tarda antichità e l\'Alto Medioevo scompare.',en:{k:"The decline",b:"With the first millennium the game gives way to backgammon, which is a variant of it. Then come chess and draughts in the West, go in the East. Between late antiquity and the early Middle Ages it disappears."}},
+ {k:'Cochin · India',b:'Solo gli ebrei di Cochin ne conservano la memoria. Lo chiamano Aasha e giocano con dodici pedine a testa, fino al primo Novecento. Negli anni Cinquanta emigrano in Israele e il gioco si perde di nuovo.',en:{k:"Cochin · India",b:"Only the Jews of Cochin keep its memory. They call it Aasha and play with twelve pieces each, until the early 20th century. In the 1950s they emigrate to Israel and the game is lost again."}},
+ {k:'Oggi',b:'Irving Finkel ricostruisce le regole dalle tavolette. Regala una copia della tavola a Garry Kasparov, che a Mosca sfida il campione francese di scacchi: perde 36 partite e ne vince 29.',en:{k:"Today",b:"Irving Finkel reconstructs the rules from the tablets. He gives a copy of the board to Garry Kasparov, who in Moscow challenges the French chess champion: he loses 36 games and wins 29."}},
+ {t:'Tocca a te',b:'Sette pedine. Quattordici caselle. Un ponte da contendere.',art:'ros',en:{t:"Your turn",b:"Seven pieces. Fourteen squares. A bridge to contest."}},
+ {k:'Fonti',b:'Voce «Gioco reale di Ur», Wikipedia. Regole: ricostruzioni di Irving Finkel e di Robert C. Bell.',small:true,en:{k:"Sources",b:"The «Royal Game of Ur» entry on Wikipedia. Rules: reconstructions by Irving Finkel and Robert C. Bell."}}
 ];
 function artSVG(a){
   const gold='#c9a860';
@@ -1262,11 +1310,12 @@ function artSVG(a){
 const Story=(function(){
   const el=$('#story'),card=$('#stCard'),cv=$('#stCv'),cx=cv.getContext('2d');
   const FI=1600,FO=1400,dur=c=>5200+c.b.length*50;
+  const curCard=n=>{const c=STORY[n];return LANG==='en'&&c.en?Object.assign({},c,c.en):c;};
   const total=STORY.reduce((a,c)=>a+dur(c),0);
   let i=0,tt=0,paused=false,running=false,last=0,raf=0,parts=[],opener=null;
   const sm=x=>{x=Math.max(0,Math.min(1,x));return x*x*(3-2*x);};
   function show(n){
-    i=n;tt=0; const c=STORY[i];
+    i=n;tt=0; const c=curCard(i);
     $('#stArt').innerHTML=c.art?artSVG(c.art):''; $('#stKick').textContent=c.k||''; $('#stTitle').textContent=c.t||''; $('#stBody').textContent=c.b||'';
     card.classList.toggle('small',!!c.small); card.style.opacity='0'; $('#stEnd').classList.remove('on');
   }
@@ -1295,15 +1344,15 @@ const Story=(function(){
   async function lock(){ try{ if('wakeLock' in navigator&&!wl&&!document.hidden){ const l=await navigator.wakeLock.request('screen'); if(!running||$('#stEnd').classList.contains('on')){l.release();return;} wl=l; l.addEventListener('release',()=>{if(wl===l)wl=null;}); } }catch(e){} }
   function unlock(){ try{ if(wl){const l=wl;wl=null;l.release();} }catch(e){} }
   document.addEventListener('visibilitychange',()=>{ if(running&&!document.hidden&&!$('#stEnd').classList.contains('on'))lock(); });
-  function end(){ unlock(); card.style.opacity='0'; $('#stEnd').classList.add('on'); $('#stProg').style.width='100%'; paused=true; $('#stPause').textContent='Pausa'; $('#stAgain').focus(); }
+  function end(){ unlock(); card.style.opacity='0'; $('#stEnd').classList.add('on'); $('#stProg').style.width='100%'; paused=true; $('#stPause').textContent=_('Pausa','Pause'); $('#stAgain').focus(); }
   function open(){
     opener=document.activeElement; el.hidden=false; document.body.style.overflow='hidden';
-    AU.unlock(); resize(); mkParts(); paused=false; $('#stPause').textContent='Pausa'; syncStMus(); show(0);
+    AU.unlock(); resize(); mkParts(); paused=false; $('#stPause').textContent=_('Pausa','Pause'); syncStMus(); show(0);
     running=true; last=performance.now(); raf=requestAnimationFrame(frame); $('#stPause').focus(); lock();
   }
   function close(){ running=false; unlock(); cancelAnimationFrame(raf); el.hidden=true; document.body.style.overflow=''; if(opener&&opener.focus)opener.focus(); }
-  function pause(){ if($('#stEnd').classList.contains('on'))return; paused=!paused; $('#stPause').textContent=paused?'Riprendi':'Pausa'; }
-  function go(n){ paused=false; if(running)lock(); $('#stPause').textContent='Pausa'; show(Math.max(0,Math.min(STORY.length-1,n))); }
+  function pause(){ if($('#stEnd').classList.contains('on'))return; paused=!paused; $('#stPause').textContent=paused?_('Riprendi','Resume'):_('Pausa','Pause'); }
+  function go(n){ paused=false; if(running)lock(); $('#stPause').textContent=_('Pausa','Pause'); show(Math.max(0,Math.min(STORY.length-1,n))); }
   addEventListener('resize',()=>{if(running){resize();mkParts();}});
   document.addEventListener('keydown',e=>{
     if(el.hidden)return;
@@ -1318,167 +1367,175 @@ const Story=(function(){
   $('#stClose').addEventListener('click',close);
   $('#stBack').addEventListener('click',close);
   $('#stAgain').addEventListener('click',()=>go(0));
-  return {open,close};
+  function refresh(){ if(!running)return; const c=curCard(i); $('#stKick').textContent=c.k||''; $('#stTitle').textContent=c.t||''; $('#stBody').textContent=c.b||''; $('#stPause').textContent=paused?_('Riprendi','Resume'):_('Pausa','Pause'); }
+  return {open,close,refresh};
 })();
-function syncStMus(){ $('#stMus').textContent='Colonna sonora: '+(AU.S.mus?'sì':'no'); $('#optMusic').checked=AU.S.mus; }
+function syncStMus(){ $('#stMus').textContent=_('Colonna sonora: ','Soundtrack: ')+(AU.S.mus?_('sì','on'):_('no','off')); $('#optMusic').checked=AU.S.mus; }
 $('#stMus').addEventListener('click',()=>{AU.setMus(!AU.S.mus);syncStMus();});
 $('#storyBtn').addEventListener('click',()=>Story.open());
+langHooks.push(()=>{Story.refresh();syncStMus();});
 syncStMus();
 
 /* ===== Regole illustrate ===== */
 const rg=(a,b)=>Array.from({length:b-a+1},(_,i)=>a+i);
 const dotsH=(w,n)=>{let s='';for(let i=0;i<n;i++)s+='<svg class="dd" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="6.2" fill="'+(i<w?'#fffdf4':'#111114')+'" stroke="#1c2a55" stroke-width="1.4"/></svg>';return s;};
 const chipH=(txt,cls,pre)=>'<span class="chip '+(cls||'')+'">'+(pre||'')+txt+'</span>';
-const rollH=(w,n,txt)=>chipH('Tiro <b>'+txt+'</b>','',dotsH(w,n));
+const rollH=(w,n,txt)=>chipH(_('Tiro','Roll')+' <b>'+txt+'</b>','',dotsH(w,n));
 const okc=t=>chipH(t,'ok','<span class="g">✓</span>'), noc=t=>chipH(t,'no','<span class="g">✕</span>'), resc=(t,c)=>chipH(t,'res '+(c||''));
-const R4=(w,txt)=>rollH(w,4,txt||(w+' '+(w===1?'vertice bianco':'vertici bianchi')));
+const R4=(w,txt)=>rollH(w,4,txt||(w+' '+(w===1?_('vertice bianco','white vertex'):_('vertici bianchi','white vertices'))));
 const R3=(w,txt)=>rollH(w,3,txt);
 const FRAC=[1,4,6,4,1];
 function diceTable(rows){
   return '<div class="dt">'+rows.map(r=>'<div class="dtr"><div class="dtd">'+(r.who?'<span class="who p'+r.o+'">'+r.who+'</span>':'')+diceHTML(r.d)+'</div><div class="dtv">'+r.big+'</div><div class="dtt"><b>'+r.t+'</b>'+(r.s?'<span>'+r.s+'</span>':'')+'</div>'
     +(r.pt?'<div class="dtp"><span class="bar"><i style="width:'+r.bar+'%"></i></span><span>'+r.pt+'</span></div>':'')+'</div>').join('')+'</div>';
 }
-const finRows=[0,1,2,3,4].map(w=>({d:Array.from({length:4},(_,i)=>i<w),big:String(w),
-  t:w===0?'Nessun movimento: si passa':'Avanza di '+w+(w===1?' casella':' caselle'),
-  s:w===0?'Tutti i vertici in alto sono neri':'oppure immetti una pedina in casella '+w,
-  pt:FRAC[w]+' volte su 16',bar:FRAC[w]/6*100}));
-const bellRows=[
-  {d:[true,true,true],big:'5',t:'Immetti una pedina e rilancia',s:'oppure avanza di 5 caselle una pedina in gioco',pt:'1 volta su 8',bar:100/3},
-  {d:[false,false,false],big:'4',t:'Avanza di 4 caselle e rilancia',s:'tre vertici neri',pt:'1 volta su 8',bar:100/3},
-  {d:[true,true,false],big:'1',t:'Avanza di 1 casella e rilancia',s:'due vertici bianchi',pt:'3 volte su 8',bar:100},
-  {d:[true,false,false],big:'0',t:'Si passa il turno',s:'senza spostamenti e senza rilanciare',pt:'3 volte su 8',bar:100}];
+const finRows=()=>[0,1,2,3,4].map(w=>({d:Array.from({length:4},(_,i)=>i<w),big:String(w),
+  t:w===0?_('Nessun movimento: si passa','No movement: pass'):_('Avanza di '+w+(w===1?' casella':' caselle'),'Advance '+w+(w===1?' square':' squares')),
+  s:w===0?_('Tutti i vertici in alto sono neri','All the vertices pointing up are black'):_('oppure immetti una pedina in casella '+w,'or enter a piece on square '+w),
+  pt:_(FRAC[w]+' volte su 16',FRAC[w]+(FRAC[w]===1?' time':' times')+' in 16'),bar:FRAC[w]/6*100}));
+const bellRows=()=>[
+  {d:[true,true,true],big:'5',t:_('Immetti una pedina e rilancia','Enter a piece and roll again'),s:_('oppure avanza di 5 caselle una pedina in gioco','or advance a piece in play by 5 squares'),pt:_('1 volta su 8','1 time in 8'),bar:100/3},
+  {d:[false,false,false],big:'4',t:_('Avanza di 4 caselle e rilancia','Advance 4 squares and roll again'),s:_('tre vertici neri','three black vertices'),pt:_('1 volta su 8','1 time in 8'),bar:100/3},
+  {d:[true,true,false],big:'1',t:_('Avanza di 1 casella e rilancia','Advance 1 square and roll again'),s:_('due vertici bianchi','two white vertices'),pt:_('3 volte su 8','3 times in 8'),bar:100},
+  {d:[true,false,false],big:'0',t:_('Si passa il turno','The turn passes'),s:_('senza spostamenti e senza rilanciare','no movement and no new roll'),pt:_('3 volte su 8','3 times in 8'),bar:100}];
 const routes=[{o:0,seq:rg(1,14),dy:-170},{o:1,seq:rg(1,14),dy:170}];
 
+const TEN={"Scopo e percorso": "Goal and route", "Ogni giocatore ha <b>sette pedine<\/b>. Vince chi per primo le porta tutte in salvo, cioè fuori dal tavoliere, dopo aver percorso quattordici caselle.": "Each player has <b>seven pieces<\/b>. The winner is the first to bring them all to safety, that is, off the board, after covering fourteen squares.", "Il percorso ha tre tratti: quattro caselle nella propria corsia (1-4), otto nella corsia centrale in comune (5-12) e due caselle finali di nuovo nella propria corsia (13-14). Le <b>rosette<\/b> sono alle caselle 4, 8 e 14.": "The route has three stretches: four squares in your own lane (1-4), eight in the shared central lane (5-12) and two final squares in your own lane again (13-14). The <b>rosettes<\/b> are on squares 4, 8 and 14.", "Le pedine in attesa stanno nel mucchio «Da giocare», quelle arrivate in salvo nel mucchio «In salvo». Blu usa la corsia in alto, Rosso quella in basso.": "Waiting pieces sit in the «To play» pile, those that have reached safety in the «Safe» pile. Blue uses the upper lane, Red the lower one.", "Percorso di Blu": "Blue's route", "Percorso di Rosso": "Red's route", "Rosette: 4, 8 e 14": "Rosettes: 4, 8 and 14", "Chi comincia": "Who starts", "Prima della partita ogni giocatore lancia i dadi. Comincia chi ottiene il tiro più alto; in caso di parità si ripete.": "Before the game each player rolls the dice. The one with the higher roll starts; in case of a tie the roll is repeated.", "Nel gioco questo tiro è automatico e compare nella cronaca.": "In the game this roll is automatic and appears in the log.", "Blu": "Blue", "2 vertici bianchi": "2 white vertices", "Rosso": "Red", "3 vertici bianchi": "3 white vertices", "Tiro più alto: comincia Rosso": "Higher roll: Red starts", "I dadi": "The dice", "Si lanciano <b>quattro dadi a forma di piramide<\/b>. Ognuno ha due vertici bianchi e due neri e conta il vertice rivolto verso l'alto. Il numero di vertici bianchi in alto, da 0 a 4, è il punteggio del tiro: indica di quante caselle ci si muove.": "You roll <b>four pyramid-shaped dice<\/b>. Each has two white vertices and two black ones, and counts the vertex pointing up. The number of white vertices pointing up, from 0 to 4, is the score of the roll: it tells you how many squares to move.", "I punteggi centrali sono i più frequenti: il 2 esce 6 volte su 16, lo 0 e il 4 una volta su 16.": "The middle scores are the most frequent: 2 comes up 6 times in 16, 0 and 4 once in 16.", "Immettere una pedina": "Entering a piece", "Una pedina del mucchio «Da giocare» entra in gioco <b>muovendosi<\/b>: con il punteggio 3 si ferma sulla terza casella del proprio percorso, con 2 sulla seconda, e così via.": "A piece from the «To play» pile enters the game <b>by moving<\/b>: with a score of 3 it stops on the third square of its route, with 2 on the second, and so on.", "A ogni tiro si può fare una sola cosa: immettere una pedina oppure muoverne una già in gioco.": "On each roll you can do only one thing: enter a piece or move one that is already in play.", "Scegliere la mossa": "Choosing the move", "Con un tiro si muove una sola pedina, a scelta, del numero di caselle ottenuto. Qui Blu ha tirato 1 e può far avanzare una delle due pedine in gioco. Non può immetterne una nuova, perché la casella 1 è occupata da una sua pedina.": "With one roll you move a single piece, of your choice, by the number of squares rolled. Here Blue has rolled 1 and can advance one of the two pieces in play. Blue cannot enter a new one, because square 1 is occupied by one of its own pieces.", "Non si può rinunciare alla mossa: se ce n'è una consentita, bisogna farla.": "You cannot decline to move: if a legal move exists, you must make it.", "Avanzare una pedina di 1": "Advance a piece by 1", "Immettere: casella 1 occupata": "Enter: square 1 occupied", "Saltare le pedine": "Jumping over pieces", "Durante il movimento si possono scavalcare altre pedine, proprie o avversarie, anche più di una. Conta solo la casella in cui il movimento finisce.": "While moving you may jump over other pieces, your own or the opponent's, even more than one. Only the square where the move ends matters.", "Caselle occupate da pedine proprie": "Squares occupied by your own pieces", "Non si può terminare il movimento su una casella occupata da una propria pedina. Qui, con il tiro 2, la pedina in casella 3 non può muoversi. Sono consentiti l'avanzamento della pedina in 5, che va in 7, e l'immissione di una nuova pedina in casella 2.": "You cannot end a move on a square occupied by one of your own pieces. Here, with a roll of 2, the piece on square 3 cannot move. Allowed are advancing the piece on 5, which goes to 7, and entering a new piece on square 2.", "Pedina in 3: arriverebbe sulla 5, occupata": "Piece on 3: would land on 5, occupied", "Pedina in 5 → 7": "Piece on 5 → 7", "Nuova pedina → 2": "New piece → 2", "Catturare": "Capturing", "Se la pedina termina su una casella occupata da una pedina avversaria, questa viene <b>eliminata<\/b> e deve ripartire da capo: torna nel mucchio «Da giocare».": "If a piece ends on a square occupied by an opposing piece, the latter is <b>removed<\/b> and must start over: it returns to the «To play» pile.", "Si può catturare solo nelle caselle 5-12, cioè nella corsia centrale in comune. Le altre caselle appartengono a un solo giocatore.": "You can capture only on squares 5-12, that is, in the shared central lane. The other squares belong to one player only.", "Rosso torna nel mucchio «Da giocare»": "Red returns to the «To play» pile", "Le rosette e il nuovo lancio": "Rosettes and the extra roll", "Chi termina il movimento su una <b>rosetta<\/b> (caselle 4, 8 e 14) lancia di nuovo i dadi e muove ancora. Il bonus può ripetersi più volte di seguito.": "Whoever ends a move on a <b>rosette<\/b> (squares 4, 8 and 14) rolls the dice again and moves again. The bonus can repeat several times in a row.", "Blu lancia di nuovo": "Blue rolls again", "Rosetta centrale occupata": "Central rosette occupied", "La rosetta centrale (casella 8) è in comune. Se è occupata da una pedina avversaria, questa <b>non può essere catturata<\/b> e la pedina in arrivo prosegue di una casella, fermandosi sulla 9. In questo caso non si ottiene il nuovo lancio.": "The central rosette (square 8) is shared. If it is occupied by an opposing piece, that piece <b>cannot be captured<\/b> and the arriving piece goes on one square further, stopping on 9. In this case no extra roll is gained.", "La mossa si può evitare muovendo un'altra pedina, se il tiro lo consente.": "The move can be avoided by moving another piece, if the roll allows it.", "Rosetta occupata: nessuna cattura": "Rosette occupied: no capture", "Uscire dal tavoliere": "Leaving the board", "Per portare in salvo una pedina serve un <b>tiro esatto<\/b>: dalla casella 13 servono 2 caselle, dalla 14 una sola. Con un tiro più alto la pedina non può uscire e resta dov'è.": "To bring a piece to safety you need an <b>exact roll<\/b>: from square 13 you need 2 squares, from 14 just one. With a higher roll the piece cannot leave and stays where it is.", "Chi termina sulla casella 14, che è una rosetta, lancia di nuovo, ma per uscire da lì serve esattamente 1.": "Whoever ends on square 14, which is a rosette, rolls again, but to leave from there exactly 1 is needed.", "Una pedina in salvo": "One piece safe", "Nessuna mossa possibile": "No move possible", "Se nessuna pedina può muoversi con il tiro ottenuto, il turno passa. Qui Blu ha tirato 3: le pedine in 13 e in 14 uscirebbero con un tiro troppo alto e non ci sono pedine da immettere.": "If no piece can move with the roll obtained, the turn passes. Here Blue has rolled 3: the pieces on 13 and 14 would leave with a roll that is too high, and there are no pieces to enter.", "Si passa anche con un tiro di 0 vertici bianchi.": "You also pass with a roll of 0 white vertices.", "Nessuna mossa: si passa": "No move: pass", "Variante: rimbalzo": "Variant: bounce", "Con questa variante, se l'unica pedina che potrebbe muoversi è quella in uscita ma il tiro è troppo alto, invece di passare la pedina avanza fino all'uscita e <b>torna indietro del resto<\/b>.": "With this variant, if the only piece that could move is the one about to leave but the roll is too high, instead of passing the piece advances to the exit and <b>goes back by the remainder<\/b>.", "Qui il tiro è 3: la pedina in casella 14 avanza di 1, raggiunge l'uscita e torna indietro di 2, fermandosi sulla 13. Si attiva dalle impostazioni con «Regola del rimbalzo».": "Here the roll is 3: the piece on square 14 advances 1, reaches the exit and goes back 2, stopping on 13. It is enabled in the settings with «Bounce rule».", "Variante opzionale": "Optional variant", "Vittoria": "Victory", "Vince il primo che porta in salvo tutte e sette le pedine. Qui a Blu ne manca una, in casella 14: con il tiro 1 esce e la partita finisce.": "The first to bring all seven pieces to safety wins. Here Blue is missing one, on square 14: with a roll of 1 it leaves and the game ends.", "Blu vince: 7 pedine su 7 in salvo": "Blue wins: 7 pieces out of 7 safe", "Il turno in sintesi": "The turn in brief", "Ecco la sequenza di un turno con le regole di Finkel.": "Here is the sequence of a turn under the Finkel rules.", "Lancia i quattro dadi e conta i vertici bianchi in alto.": "Roll the four dice and count the white vertices pointing up.", "Con 0 vertici bianchi il turno passa all'avversario.": "With 0 white vertices the turn passes to the opponent.", "Scegli una mossa: immettere una pedina in quella casella del percorso oppure avanzare una pedina in gioco del numero ottenuto.": "Choose a move: enter a piece on the corresponding square of the route, or advance a piece in play by the number rolled.", "Controlla la casella di arrivo: se è occupata da una tua pedina la mossa non è consentita; se c'è una pedina avversaria nella corsia centrale la catturi; se è la rosetta centrale occupata prosegui di una casella.": "Check the arrival square: if it is occupied by one of your pieces the move is not allowed; if there is an opposing piece in the central lane you capture it; if it is the occupied central rosette you go on one square further.", "Se arrivi su una rosetta (4, 8 o 14) lancia di nuovo.": "If you land on a rosette (4, 8 or 14), roll again.", "Per uscire serve un tiro esatto. Se nessuna mossa è possibile, passa.": "To leave you need an exact roll. If no move is possible, pass.", "Vince chi porta in salvo per primo tutte e sette le pedine.": "The first to bring all seven pieces to safety wins.", "Le regole di Bell sono la ricostruzione più diffusa prima degli studi di Finkel: si usano <b>tre dadi<\/b> e una <b>posta<\/b>.": "The Bell rules are the most widespread reconstruction before Finkel's studies: they use <b>three dice<\/b> and a <b>stake<\/b>.", "Lo scopo è lo stesso: portare in salvo tutte e sette le pedine. Il percorso è di quattordici caselle: quattro nella propria corsia (1-4), otto nella corsia centrale in comune (5-12), due finali nella propria corsia (13-14). Le rosette sono alle caselle 4, 8 e 14.": "The goal is the same: bring all seven pieces to safety. The route is fourteen squares: four in your own lane (1-4), eight in the shared central lane (5-12), two final ones in your own lane (13-14). The rosettes are on squares 4, 8 and 14.", "Posta e primo giocatore": "Stake and first player", "Prima di cominciare i giocatori stabiliscono il valore della posta e chi inizia, anche con un tiro di dadi: comincia chi ottiene il punteggio maggiore.": "Before starting, the players agree on the value of the stake and on who begins, possibly with a roll of the dice: whoever gets the higher score starts.", "Nel gioco la posta è di un gettone e il tiro d'apertura è automatico. Le poste pagate si accumulano nel <b>banco<\/b>, che spetta a chi vince.": "In the game the stake is one token and the opening roll is automatic. The stakes paid accumulate in the <b>bank<\/b>, which goes to the winner.", "1 vertice bianco": "1 white vertex", "I tre dadi": "The three dice", "Si lanciano tre dadi piramidali con vertici bianchi e neri. Il risultato non si somma: <b>ogni combinazione corrisponde a una mossa precisa<\/b>, come nello schema.": "You roll three pyramid dice with white and black vertices. The result is not added up: <b>each combination corresponds to a specific move<\/b>, as in the table.", "«Rilanciare» significa tirare ancora i dadi e fare un'altra mossa nello stesso turno.": "«Rolling again» means throwing the dice again and making another move in the same turn.", "Immettere la prima pedina": "Entering the first piece", "Per mettere in gioco una pedina servono <b>tre vertici bianchi<\/b>. Finché non esce questo risultato, e non ci sono pedine in gioco, si passa il turno.": "To put a piece into play you need <b>three white vertices<\/b>. Until that result comes up, and if there are no pieces in play, you pass the turn.", "La pedina viene sempre collocata sulla casella 1 e si rilanciano i dadi per spostarla.": "The piece is always placed on square 1 and the dice are rolled again to move it.", "3 bianchi": "3 white", "Si rilancia per muoverla": "Roll again to move it", "Il rilancio della nuova pedina": "The new piece's second roll", "Il secondo lancio sposta la pedina appena immessa: tre vertici bianchi la portano avanti di 5 caselle, tre neri di 4, due bianchi di 1.": "The second roll moves the piece just entered: three white vertices take it forward 5 squares, three black ones 4, two white ones 1.", "Dopo questa mossa il turno passa all'avversario.": "After this move the turn passes to the opponent.", "3 neri · 4": "3 black · 4", "Pedina ritirata": "Piece withdrawn", "Se il secondo lancio dà un solo vertice bianco non c'è movimento e la pedina appena immessa viene <b>ritirata dal gioco<\/b>: torna nel mucchio «Da giocare».": "If the second roll gives a single white vertex there is no movement and the piece just entered is <b>withdrawn from the game<\/b>: it returns to the «To play» pile.", "Nel gioco, se la casella d'arrivo è occupata da una propria pedina, la nuova pedina resta in casella 1.": "In the game, if the arrival square is occupied by one of your own pieces, the new piece stays on square 1.", "1 bianco · 0": "1 white · 0", "Tre bianchi: avanzare di 5": "Three white: advance 5", "Con tre vertici bianchi si sceglie tra due mosse: <b>immettere una pedina<\/b> e rilanciare, oppure <b>avanzare di 5 caselle<\/b> una pedina già in gioco. Nel secondo caso non si rilancia.": "With three white vertices you choose between two moves: <b>enter a piece<\/b> and roll again, or <b>advance 5 squares<\/b> a piece already in play. In the second case you do not roll again.", "3 bianchi · 5": "3 white · 5", "Pedina in 2 → 7": "Piece on 2 → 7", "Pedina in 6 → 11": "Piece on 6 → 11", "Tre neri: avanzare di 4 e rilanciare": "Three black: advance 4 and roll again", "Con tre vertici neri una pedina in gioco avanza di 4 caselle e si lancia ancora.": "With three black vertices a piece in play advances 4 squares and you roll again.", "La pedina in casella 2 non può muoversi: arriverebbe sulla 6, occupata da una propria pedina. Si muove l'altra, da 6 a 10.": "The piece on square 2 cannot move: it would land on 6, occupied by one of your own pieces. The other one moves, from 6 to 10.", "Blu rilancia": "Blue rolls again", "Due bianchi: avanzare di 1 e rilanciare": "Two white: advance 1 and roll again", "Con due vertici bianchi una pedina in gioco avanza di una casella e si rilancia. È il risultato più frequente insieme all'unico vertice bianco.": "With two white vertices a piece in play advances one square and you roll again. It is the most frequent result, together with the single white vertex.", "2 bianchi · 1": "2 white · 1", "Saltare e catturare": "Jumping and capturing", "Si possono scavalcare le pedine, proprie o avversarie. Se il movimento termina su una pedina avversaria, questa torna nel mucchio e deve ripartire.": "Pieces, your own or the opponent's, may be jumped over. If the move ends on an opposing piece, that piece returns to the pile and must start again.", "Nelle regole di Bell le rosette non proteggono le pedine.": "Under the Bell rules the rosettes do not protect pieces.", "Rosso ricomincia": "Red starts again", "Rosette e posta": "Rosettes and stake", "Chi termina su una rosetta fa pagare la posta all'avversario, che la versa al banco. La rosetta di per sé non dà un nuovo lancio: si rilancia solo se lo prevede il tiro.": "Whoever ends on a rosette makes the opponent pay the stake, which is put into the bank. The rosette itself gives no extra roll: you roll again only if the roll provides for it.", "Rosso paga 1 gettone": "Red pays 1 token", "Banco: 0 → 1": "Bank: 0 → 1", "Come in Finkel serve un <b>tiro esatto<\/b>. Qui la pedina in casella 11 esce con tre vertici neri, cioè 4 caselle, e poi si rilancia. Con un tiro più alto non potrebbe uscire: dalla 14 serve esattamente 1, dalla 10 esattamente 5.": "As in Finkel, an <b>exact roll<\/b> is needed. Here the piece on square 11 leaves with three black vertices, that is, 4 squares, and then you roll again. With a higher roll it could not leave: from 14 exactly 1 is needed, from 10 exactly 5.", "Se nessuna mossa è possibile si passa il turno <b>senza rilanciare<\/b>, anche quando il tiro avrebbe previsto un rilancio. Lo stesso vale con un solo vertice bianco.": "If no move is possible you pass the turn <b>without rolling again<\/b>, even when the roll would have allowed another roll. The same applies with a single white vertex.", "Qui Blu ha tirato tre bianchi, ma la pedina in 14 uscirebbe con un tiro troppo alto e non ci sono altre pedine da muovere o immettere.": "Here Blue has rolled three white, but the piece on 14 would leave with a roll that is too high, and there are no other pieces to move or enter.", "Nessuna mossa: si passa senza rilanciare": "No move: pass without rolling again", "Se l'unica pedina che potrebbe muoversi è quella in uscita ma il tiro è troppo alto, invece di passare avanza fino all'uscita e torna indietro del resto.": "If the only piece that could move is the one about to leave but the roll is too high, instead of passing it advances to the exit and goes back by the remainder.", "Qui il tiro è 5: la pedina in casella 14 avanza di 1, raggiunge l'uscita e torna indietro di 4, fermandosi sulla 11. Si attiva dalle impostazioni con «Regola del rimbalzo».": "Here the roll is 5: the piece on square 14 advances 1, reaches the exit and goes back 4, stopping on 11. It is enabled in the settings with «Bounce rule».", "Variante: uscita con quattro punti": "Variant: exit with a four", "In alternativa all'uscita con tiro esatto si può stabilire che una pedina esca solo con un tiro da quattro punti, cioè tre vertici neri.": "As an alternative to leaving with an exact roll, you can decide that a piece leaves only with a roll of four points, that is, three black vertices.", "Nel gioco la pedina esce se il movimento di 4 caselle raggiunge o supera l'ultima casella: qui dalla 12. Con gli altri tiri non si esce.": "In the game the piece leaves if the 4-square move reaches or passes the last square: here from 12. With other rolls it does not leave.", "Vittoria e banco": "Victory and bank", "Vince il primo che porta in salvo tutte e sette le pedine e <b>si aggiudica l'intero banco<\/b> accumulato con i passaggi sulle rosette. Qui Blu esce con due vertici bianchi, cioè 1 casella.": "The first to bring all seven pieces to safety wins and <b>takes the whole bank<\/b> accumulated through landings on rosettes. Here Blue leaves with two white vertices, that is, 1 square.", "Blu vince": "Blue wins", "Prende il banco": "Takes the bank", "Ecco la sequenza di un turno con le regole di Bell.": "Here is the sequence of a turn under the Bell rules.", "Lancia i tre dadi e conta i vertici bianchi in alto.": "Roll the three dice and count the white vertices pointing up.", "Un bianco: si passa il turno, senza rilanciare.": "One white: the turn passes, without rolling again.", "Due bianchi: avanza una pedina di 1 e rilancia. Tre neri: avanza una pedina di 4 e rilancia.": "Two white: advance a piece by 1 and roll again. Three black: advance a piece by 4 and roll again.", "Tre bianchi: immetti una pedina in casella 1 e rilancia per muoverla, oppure avanza una pedina di 5.": "Three white: enter a piece on square 1 and roll again to move it, or advance a piece by 5.", "Non si finisce su una propria pedina; si salta, si cattura quella avversaria.": "You cannot end on one of your own pieces; you jump over pieces and capture opposing ones.", "Su una rosetta l'avversario paga la posta al banco. L'uscita richiede un tiro esatto.": "On a rosette the opponent pays the stake to the bank. Leaving requires an exact roll.", "Se nessuna mossa è possibile si passa senza rilanciare. Vince chi esce per primo con tutte le pedine e prende il banco.": "If no move is possible you pass without rolling again. The first to leave with all pieces wins and takes the bank."};
+const TT=x=>(LANG==='en'&&TEN[x]!=null?TEN[x]:x);
+function buildTuts(){
 const FIN=[
- {t:'Scopo e percorso',p:[
-   `Ogni giocatore ha <b>sette pedine</b>. Vince chi per primo le porta tutte in salvo, cioè fuori dal tavoliere, dopo aver percorso quattordici caselle.`,
-   `Il percorso ha tre tratti: quattro caselle nella propria corsia (1-4), otto nella corsia centrale in comune (5-12) e due caselle finali di nuovo nella propria corsia (13-14). Le <b>rosette</b> sono alle caselle 4, 8 e 14.`,
-   `Le pedine in attesa stanno nel mucchio «Da giocare», quelle arrivate in salvo nel mucchio «In salvo». Blu usa la corsia in alto, Rosso quella in basso.`],
-  sc:{type:'board',arrows:routes,chips:[chipH('Percorso di Blu','','<i class="sd p0"></i>'),chipH('Percorso di Rosso','','<i class="sd p1"></i>'),chipH('Rosette: 4, 8 e 14')]}},
- {t:'Chi comincia',p:[`Prima della partita ogni giocatore lancia i dadi. Comincia chi ottiene il tiro più alto; in caso di parità si ripete.`,`Nel gioco questo tiro è automatico e compare nella cronaca.`],
-  sc:{type:'dice',rows:[{who:'Blu',o:0,d:[true,true,false,false],big:'2',t:'2 vertici bianchi'},{who:'Rosso',o:1,d:[true,true,true,false],big:'3',t:'3 vertici bianchi',s:'Tiro più alto: comincia Rosso'}]}},
- {t:'I dadi',p:[
-   `Si lanciano <b>quattro dadi a forma di piramide</b>. Ognuno ha due vertici bianchi e due neri e conta il vertice rivolto verso l'alto. Il numero di vertici bianchi in alto, da 0 a 4, è il punteggio del tiro: indica di quante caselle ci si muove.`,
-   `I punteggi centrali sono i più frequenti: il 2 esce 6 volte su 16, lo 0 e il 4 una volta su 16.`],
-  sc:{type:'dice',rows:finRows}},
- {t:'Immettere una pedina',p:[
-   `Una pedina del mucchio «Da giocare» entra in gioco <b>muovendosi</b>: con il punteggio 3 si ferma sulla terza casella del proprio percorso, con 2 sulla seconda, e così via.`,
-   `A ogni tiro si può fare una sola cosa: immettere una pedina oppure muoverne una già in gioco.`],
+ {t:TT('Scopo e percorso'),p:[
+   TT(`Ogni giocatore ha <b>sette pedine</b>. Vince chi per primo le porta tutte in salvo, cioè fuori dal tavoliere, dopo aver percorso quattordici caselle.`),
+   TT(`Il percorso ha tre tratti: quattro caselle nella propria corsia (1-4), otto nella corsia centrale in comune (5-12) e due caselle finali di nuovo nella propria corsia (13-14). Le <b>rosette</b> sono alle caselle 4, 8 e 14.`),
+   TT(`Le pedine in attesa stanno nel mucchio «Da giocare», quelle arrivate in salvo nel mucchio «In salvo». Blu usa la corsia in alto, Rosso quella in basso.`)],
+  sc:{type:'board',arrows:routes,chips:[chipH(TT('Percorso di Blu'),'','<i class="sd p0"></i>'),chipH(TT('Percorso di Rosso'),'','<i class="sd p1"></i>'),chipH(TT('Rosette: 4, 8 e 14'))]}},
+ {t:TT('Chi comincia'),p:[TT(`Prima della partita ogni giocatore lancia i dadi. Comincia chi ottiene il tiro più alto; in caso di parità si ripete.`),TT(`Nel gioco questo tiro è automatico e compare nella cronaca.`)],
+  sc:{type:'dice',rows:[{who:TT('Blu'),o:0,d:[true,true,false,false],big:'2',t:TT('2 vertici bianchi')},{who:TT('Rosso'),o:1,d:[true,true,true,false],big:'3',t:TT('3 vertici bianchi'),s:TT('Tiro più alto: comincia Rosso')}]}},
+ {t:TT('I dadi'),p:[
+   TT(`Si lanciano <b>quattro dadi a forma di piramide</b>. Ognuno ha due vertici bianchi e due neri e conta il vertice rivolto verso l'alto. Il numero di vertici bianchi in alto, da 0 a 4, è il punteggio del tiro: indica di quante caselle ci si muove.`),
+   TT(`I punteggi centrali sono i più frequenti: il 2 esce 6 volte su 16, lo 0 e il 4 una volta su 16.`)],
+  sc:{type:'dice',rows:finRows()}},
+ {t:TT('Immettere una pedina'),p:[
+   TT(`Una pedina del mucchio «Da giocare» entra in gioco <b>muovendosi</b>: con il punteggio 3 si ferma sulla terza casella del proprio percorso, con 2 sulla seconda, e così via.`),
+   TT(`A ogni tiro si può fare una sola cosa: immettere una pedina oppure muoverne una già in gioco.`)],
   sc:{type:'board',roll:R4(3,'3'),arrows:[{o:0,seq:['H',1,2,3]}],marks:[{o:0,sq:3,k:'ok'}],after:{b0:3}}},
- {t:'Scegliere la mossa',p:[
-   `Con un tiro si muove una sola pedina, a scelta, del numero di caselle ottenuto. Qui Blu ha tirato 1 e può far avanzare una delle due pedine in gioco. Non può immetterne una nuova, perché la casella 1 è occupata da una sua pedina.`,
-   `Non si può rinunciare alla mossa: se ce n'è una consentita, bisogna farla.`],
-  sc:{type:'board',b:[1,6],roll:R4(1),arrows:[{o:0,seq:[1,2]},{o:0,seq:[6,7]}],marks:[{o:0,sq:2,k:'ok'},{o:0,sq:7,k:'ok'},{o:0,sq:1,k:'no'}],chips:[okc('Avanzare una pedina di 1'),noc('Immettere: casella 1 occupata')]}},
- {t:'Saltare le pedine',p:[`Durante il movimento si possono scavalcare altre pedine, proprie o avversarie, anche più di una. Conta solo la casella in cui il movimento finisce.`],
+ {t:TT('Scegliere la mossa'),p:[
+   TT(`Con un tiro si muove una sola pedina, a scelta, del numero di caselle ottenuto. Qui Blu ha tirato 1 e può far avanzare una delle due pedine in gioco. Non può immetterne una nuova, perché la casella 1 è occupata da una sua pedina.`),
+   TT(`Non si può rinunciare alla mossa: se ce n'è una consentita, bisogna farla.`)],
+  sc:{type:'board',b:[1,6],roll:R4(1),arrows:[{o:0,seq:[1,2]},{o:0,seq:[6,7]}],marks:[{o:0,sq:2,k:'ok'},{o:0,sq:7,k:'ok'},{o:0,sq:1,k:'no'}],chips:[okc(TT('Avanzare una pedina di 1')),noc(TT('Immettere: casella 1 occupata'))]}},
+ {t:TT('Saltare le pedine'),p:[TT(`Durante il movimento si possono scavalcare altre pedine, proprie o avversarie, anche più di una. Conta solo la casella in cui il movimento finisce.`)],
   sc:{type:'board',b:[3,4],r:[5],roll:R4(3,'3'),arrows:[{o:0,seq:[3,4,5,6]}],marks:[{o:0,sq:6,k:'ok'}],after:{b0:6}}},
- {t:'Caselle occupate da pedine proprie',p:[
-   `Non si può terminare il movimento su una casella occupata da una propria pedina. Qui, con il tiro 2, la pedina in casella 3 non può muoversi. Sono consentiti l'avanzamento della pedina in 5, che va in 7, e l'immissione di una nuova pedina in casella 2.`],
-  sc:{type:'board',b:[3,5],roll:R4(2,'2'),marks:[{o:0,sq:5,k:'no'},{o:0,sq:7,k:'ok'},{o:0,sq:2,k:'ok'}],arrows:[{o:0,seq:[5,6,7]},{o:0,seq:['H',1,2]}],chips:[noc('Pedina in 3: arriverebbe sulla 5, occupata'),okc('Pedina in 5 → 7'),okc('Nuova pedina → 2')]}},
- {t:'Catturare',p:[
-   `Se la pedina termina su una casella occupata da una pedina avversaria, questa viene <b>eliminata</b> e deve ripartire da capo: torna nel mucchio «Da giocare».`,
-   `Si può catturare solo nelle caselle 5-12, cioè nella corsia centrale in comune. Le altre caselle appartengono a un solo giocatore.`],
-  sc:{type:'board',b:[6],r:[9],roll:R4(3,'3'),arrows:[{o:0,seq:[6,7,8,9]}],marks:[{o:0,sq:9,k:'cap'}],after:{b0:9,r0:0},res:[resc('Rosso torna nel mucchio «Da giocare»')]}},
- {t:'Le rosette e il nuovo lancio',p:[`Chi termina il movimento su una <b>rosetta</b> (caselle 4, 8 e 14) lancia di nuovo i dadi e muove ancora. Il bonus può ripetersi più volte di seguito.`],
-  sc:{type:'board',b:[2],roll:R4(2,'2'),arrows:[{o:0,seq:[2,3,4]}],marks:[{o:0,sq:4,k:'ok'}],after:{b0:4},res:[resc('Blu lancia di nuovo','win')]}},
- {t:'Rosetta centrale occupata',p:[
-   `La rosetta centrale (casella 8) è in comune. Se è occupata da una pedina avversaria, questa <b>non può essere catturata</b> e la pedina in arrivo prosegue di una casella, fermandosi sulla 9. In questo caso non si ottiene il nuovo lancio.`,
-   `La mossa si può evitare muovendo un'altra pedina, se il tiro lo consente.`],
-  sc:{type:'board',b:[6],r:[8],roll:R4(2,'2'),arrows:[{o:0,seq:[6,7,8,9]}],marks:[{o:0,sq:8,k:'no'},{o:0,sq:9,k:'ok'}],after:{b0:9},chips:[noc('Rosetta occupata: nessuna cattura')]}},
- {t:'Uscire dal tavoliere',p:[
-   `Per portare in salvo una pedina serve un <b>tiro esatto</b>: dalla casella 13 servono 2 caselle, dalla 14 una sola. Con un tiro più alto la pedina non può uscire e resta dov'è.`,
-   `Chi termina sulla casella 14, che è una rosetta, lancia di nuovo, ma per uscire da lì serve esattamente 1.`],
-  sc:{type:'board',b:[13],roll:R4(2,'2'),arrows:[{o:0,seq:[13,14,'X']}],after:{b0:15},res:[resc('Una pedina in salvo')]}},
- {t:'Nessuna mossa possibile',p:[
-   `Se nessuna pedina può muoversi con il tiro ottenuto, il turno passa. Qui Blu ha tirato 3: le pedine in 13 e in 14 uscirebbero con un tiro troppo alto e non ci sono pedine da immettere.`,
-   `Si passa anche con un tiro di 0 vertici bianchi.`],
-  sc:{type:'board',b:[13,14],bo:5,roll:R4(3,'3'),marks:[{o:0,sq:13,k:'no'},{o:0,sq:14,k:'no'}],chips:[noc('Nessuna mossa: si passa')]}},
- {t:'Variante: rimbalzo',p:[
-   `Con questa variante, se l'unica pedina che potrebbe muoversi è quella in uscita ma il tiro è troppo alto, invece di passare la pedina avanza fino all'uscita e <b>torna indietro del resto</b>.`,
-   `Qui il tiro è 3: la pedina in casella 14 avanza di 1, raggiunge l'uscita e torna indietro di 2, fermandosi sulla 13. Si attiva dalle impostazioni con «Regola del rimbalzo».`],
-  sc:{type:'board',b:[14],bo:6,roll:R4(3,'3'),arrows:[{o:0,seq:[14,'X'],dy:-260},{o:0,seq:['X',14,13],dy:260,k:'k'}],after:{b0:13},res:[resc('Variante opzionale')]}},
- {t:'Vittoria',p:[`Vince il primo che porta in salvo tutte e sette le pedine. Qui a Blu ne manca una, in casella 14: con il tiro 1 esce e la partita finisce.`],
-  sc:{type:'board',b:[14],bo:6,roll:R4(1),arrows:[{o:0,seq:[14,'X']}],after:{b0:15},res:[resc('Blu vince: 7 pedine su 7 in salvo','win')]}},
- {t:'Il turno in sintesi',p:[`Ecco la sequenza di un turno con le regole di Finkel.`],
+ {t:TT('Caselle occupate da pedine proprie'),p:[
+   TT(`Non si può terminare il movimento su una casella occupata da una propria pedina. Qui, con il tiro 2, la pedina in casella 3 non può muoversi. Sono consentiti l'avanzamento della pedina in 5, che va in 7, e l'immissione di una nuova pedina in casella 2.`)],
+  sc:{type:'board',b:[3,5],roll:R4(2,'2'),marks:[{o:0,sq:5,k:'no'},{o:0,sq:7,k:'ok'},{o:0,sq:2,k:'ok'}],arrows:[{o:0,seq:[5,6,7]},{o:0,seq:['H',1,2]}],chips:[noc(TT('Pedina in 3: arriverebbe sulla 5, occupata')),okc(TT('Pedina in 5 → 7')),okc(TT('Nuova pedina → 2'))]}},
+ {t:TT('Catturare'),p:[
+   TT(`Se la pedina termina su una casella occupata da una pedina avversaria, questa viene <b>eliminata</b> e deve ripartire da capo: torna nel mucchio «Da giocare».`),
+   TT(`Si può catturare solo nelle caselle 5-12, cioè nella corsia centrale in comune. Le altre caselle appartengono a un solo giocatore.`)],
+  sc:{type:'board',b:[6],r:[9],roll:R4(3,'3'),arrows:[{o:0,seq:[6,7,8,9]}],marks:[{o:0,sq:9,k:'cap'}],after:{b0:9,r0:0},res:[resc(TT('Rosso torna nel mucchio «Da giocare»'))]}},
+ {t:TT('Le rosette e il nuovo lancio'),p:[TT(`Chi termina il movimento su una <b>rosetta</b> (caselle 4, 8 e 14) lancia di nuovo i dadi e muove ancora. Il bonus può ripetersi più volte di seguito.`)],
+  sc:{type:'board',b:[2],roll:R4(2,'2'),arrows:[{o:0,seq:[2,3,4]}],marks:[{o:0,sq:4,k:'ok'}],after:{b0:4},res:[resc(TT('Blu lancia di nuovo'),'win')]}},
+ {t:TT('Rosetta centrale occupata'),p:[
+   TT(`La rosetta centrale (casella 8) è in comune. Se è occupata da una pedina avversaria, questa <b>non può essere catturata</b> e la pedina in arrivo prosegue di una casella, fermandosi sulla 9. In questo caso non si ottiene il nuovo lancio.`),
+   TT(`La mossa si può evitare muovendo un'altra pedina, se il tiro lo consente.`)],
+  sc:{type:'board',b:[6],r:[8],roll:R4(2,'2'),arrows:[{o:0,seq:[6,7,8,9]}],marks:[{o:0,sq:8,k:'no'},{o:0,sq:9,k:'ok'}],after:{b0:9},chips:[noc(TT('Rosetta occupata: nessuna cattura'))]}},
+ {t:TT('Uscire dal tavoliere'),p:[
+   TT(`Per portare in salvo una pedina serve un <b>tiro esatto</b>: dalla casella 13 servono 2 caselle, dalla 14 una sola. Con un tiro più alto la pedina non può uscire e resta dov'è.`),
+   TT(`Chi termina sulla casella 14, che è una rosetta, lancia di nuovo, ma per uscire da lì serve esattamente 1.`)],
+  sc:{type:'board',b:[13],roll:R4(2,'2'),arrows:[{o:0,seq:[13,14,'X']}],after:{b0:15},res:[resc(TT('Una pedina in salvo'))]}},
+ {t:TT('Nessuna mossa possibile'),p:[
+   TT(`Se nessuna pedina può muoversi con il tiro ottenuto, il turno passa. Qui Blu ha tirato 3: le pedine in 13 e in 14 uscirebbero con un tiro troppo alto e non ci sono pedine da immettere.`),
+   TT(`Si passa anche con un tiro di 0 vertici bianchi.`)],
+  sc:{type:'board',b:[13,14],bo:5,roll:R4(3,'3'),marks:[{o:0,sq:13,k:'no'},{o:0,sq:14,k:'no'}],chips:[noc(TT('Nessuna mossa: si passa'))]}},
+ {t:TT('Variante: rimbalzo'),p:[
+   TT(`Con questa variante, se l'unica pedina che potrebbe muoversi è quella in uscita ma il tiro è troppo alto, invece di passare la pedina avanza fino all'uscita e <b>torna indietro del resto</b>.`),
+   TT(`Qui il tiro è 3: la pedina in casella 14 avanza di 1, raggiunge l'uscita e torna indietro di 2, fermandosi sulla 13. Si attiva dalle impostazioni con «Regola del rimbalzo».`)],
+  sc:{type:'board',b:[14],bo:6,roll:R4(3,'3'),arrows:[{o:0,seq:[14,'X'],dy:-260},{o:0,seq:['X',14,13],dy:260,k:'k'}],after:{b0:13},res:[resc(TT('Variante opzionale'))]}},
+ {t:TT('Vittoria'),p:[TT(`Vince il primo che porta in salvo tutte e sette le pedine. Qui a Blu ne manca una, in casella 14: con il tiro 1 esce e la partita finisce.`)],
+  sc:{type:'board',b:[14],bo:6,roll:R4(1),arrows:[{o:0,seq:[14,'X']}],after:{b0:15},res:[resc(TT('Blu vince: 7 pedine su 7 in salvo'),'win')]}},
+ {t:TT('Il turno in sintesi'),p:[TT(`Ecco la sequenza di un turno con le regole di Finkel.`)],
   sc:{type:'flow',steps:[
-   `Lancia i quattro dadi e conta i vertici bianchi in alto.`,
-   `Con 0 vertici bianchi il turno passa all'avversario.`,
-   `Scegli una mossa: immettere una pedina in quella casella del percorso oppure avanzare una pedina in gioco del numero ottenuto.`,
-   `Controlla la casella di arrivo: se è occupata da una tua pedina la mossa non è consentita; se c'è una pedina avversaria nella corsia centrale la catturi; se è la rosetta centrale occupata prosegui di una casella.`,
-   `Se arrivi su una rosetta (4, 8 o 14) lancia di nuovo.`,
-   `Per uscire serve un tiro esatto. Se nessuna mossa è possibile, passa.`,
-   `Vince chi porta in salvo per primo tutte e sette le pedine.`]}}
+   TT(`Lancia i quattro dadi e conta i vertici bianchi in alto.`),
+   TT(`Con 0 vertici bianchi il turno passa all'avversario.`),
+   TT(`Scegli una mossa: immettere una pedina in quella casella del percorso oppure avanzare una pedina in gioco del numero ottenuto.`),
+   TT(`Controlla la casella di arrivo: se è occupata da una tua pedina la mossa non è consentita; se c'è una pedina avversaria nella corsia centrale la catturi; se è la rosetta centrale occupata prosegui di una casella.`),
+   TT(`Se arrivi su una rosetta (4, 8 o 14) lancia di nuovo.`),
+   TT(`Per uscire serve un tiro esatto. Se nessuna mossa è possibile, passa.`),
+   TT(`Vince chi porta in salvo per primo tutte e sette le pedine.`)]}}
 ];
 
 const BEL=[
- {t:'Scopo e percorso',p:[
-   `Le regole di Bell sono la ricostruzione più diffusa prima degli studi di Finkel: si usano <b>tre dadi</b> e una <b>posta</b>.`,
-   `Lo scopo è lo stesso: portare in salvo tutte e sette le pedine. Il percorso è di quattordici caselle: quattro nella propria corsia (1-4), otto nella corsia centrale in comune (5-12), due finali nella propria corsia (13-14). Le rosette sono alle caselle 4, 8 e 14.`],
-  sc:{type:'board',arrows:routes,chips:[chipH('Percorso di Blu','','<i class="sd p0"></i>'),chipH('Percorso di Rosso','','<i class="sd p1"></i>'),chipH('Rosette: 4, 8 e 14')]}},
- {t:'Posta e primo giocatore',p:[
-   `Prima di cominciare i giocatori stabiliscono il valore della posta e chi inizia, anche con un tiro di dadi: comincia chi ottiene il punteggio maggiore.`,
-   `Nel gioco la posta è di un gettone e il tiro d'apertura è automatico. Le poste pagate si accumulano nel <b>banco</b>, che spetta a chi vince.`],
-  sc:{type:'dice',rows:[{who:'Blu',o:0,d:[true,false,false],big:'1',t:'1 vertice bianco'},{who:'Rosso',o:1,d:[true,true,true],big:'3',t:'3 vertici bianchi',s:'Tiro più alto: comincia Rosso'}]}},
- {t:'I tre dadi',p:[
-   `Si lanciano tre dadi piramidali con vertici bianchi e neri. Il risultato non si somma: <b>ogni combinazione corrisponde a una mossa precisa</b>, come nello schema.`,
-   `«Rilanciare» significa tirare ancora i dadi e fare un'altra mossa nello stesso turno.`],
-  sc:{type:'dice',rows:bellRows}},
- {t:'Immettere la prima pedina',p:[
-   `Per mettere in gioco una pedina servono <b>tre vertici bianchi</b>. Finché non esce questo risultato, e non ci sono pedine in gioco, si passa il turno.`,
-   `La pedina viene sempre collocata sulla casella 1 e si rilanciano i dadi per spostarla.`],
-  sc:{type:'board',roll:R3(3,'3 bianchi'),arrows:[{o:0,seq:['H',1]}],marks:[{o:0,sq:1,k:'ok'}],after:{b0:1},res:[resc('Si rilancia per muoverla')]}},
- {t:'Il rilancio della nuova pedina',p:[
-   `Il secondo lancio sposta la pedina appena immessa: tre vertici bianchi la portano avanti di 5 caselle, tre neri di 4, due bianchi di 1.`,
-   `Dopo questa mossa il turno passa all'avversario.`],
-  sc:{type:'board',b:[1],roll:R3(0,'3 neri · 4'),arrows:[{o:0,seq:[1,2,3,4,5]}],marks:[{o:0,sq:5,k:'ok'}],after:{b0:5}}},
- {t:'Pedina ritirata',p:[
-   `Se il secondo lancio dà un solo vertice bianco non c'è movimento e la pedina appena immessa viene <b>ritirata dal gioco</b>: torna nel mucchio «Da giocare».`,
-   `Nel gioco, se la casella d'arrivo è occupata da una propria pedina, la nuova pedina resta in casella 1.`],
-  sc:{type:'board',b:[1],roll:R3(1,'1 bianco · 0'),after:{b0:0},res:[resc('Pedina ritirata')]}},
- {t:'Tre bianchi: avanzare di 5',p:[
-   `Con tre vertici bianchi si sceglie tra due mosse: <b>immettere una pedina</b> e rilanciare, oppure <b>avanzare di 5 caselle</b> una pedina già in gioco. Nel secondo caso non si rilancia.`],
-  sc:{type:'board',b:[2,6],roll:R3(3,'3 bianchi · 5'),arrows:[{o:0,seq:['H',1]},{o:0,seq:[2,3,4,5,6,7]},{o:0,seq:[6,7,8,9,10,11]}],marks:[{o:0,sq:1,k:'ok'},{o:0,sq:7,k:'ok'},{o:0,sq:11,k:'ok'}],chips:[okc('Immettere una pedina'),okc('Pedina in 2 → 7'),okc('Pedina in 6 → 11')]}},
- {t:'Tre neri: avanzare di 4 e rilanciare',p:[
-   `Con tre vertici neri una pedina in gioco avanza di 4 caselle e si lancia ancora.`,
-   `La pedina in casella 2 non può muoversi: arriverebbe sulla 6, occupata da una propria pedina. Si muove l'altra, da 6 a 10.`],
-  sc:{type:'board',b:[2,6],roll:R3(0,'3 neri · 4'),arrows:[{o:0,seq:[6,7,8,9,10]}],marks:[{o:0,sq:6,k:'no'},{o:0,sq:10,k:'ok'}],after:{b1:10},res:[resc('Blu rilancia','win')]}},
- {t:'Due bianchi: avanzare di 1 e rilanciare',p:[`Con due vertici bianchi una pedina in gioco avanza di una casella e si rilancia. È il risultato più frequente insieme all'unico vertice bianco.`],
-  sc:{type:'board',b:[6],roll:R3(2,'2 bianchi · 1'),arrows:[{o:0,seq:[6,7]}],marks:[{o:0,sq:7,k:'ok'}],after:{b0:7},res:[resc('Blu rilancia','win')]}},
- {t:'Saltare e catturare',p:[
-   `Si possono scavalcare le pedine, proprie o avversarie. Se il movimento termina su una pedina avversaria, questa torna nel mucchio e deve ripartire.`,
-   `Nelle regole di Bell le rosette non proteggono le pedine.`],
-  sc:{type:'board',b:[4],r:[9],roll:R3(3,'3 bianchi · 5'),arrows:[{o:0,seq:[4,5,6,7,8,9]}],marks:[{o:0,sq:9,k:'cap'}],after:{b0:9,r0:0},res:[resc('Rosso ricomincia')]}},
- {t:'Rosette e posta',p:[
-   `Chi termina su una rosetta fa pagare la posta all'avversario, che la versa al banco. La rosetta di per sé non dà un nuovo lancio: si rilancia solo se lo prevede il tiro.`],
-  sc:{type:'board',b:[3],roll:R3(3,'3 bianchi · 5'),arrows:[{o:0,seq:[3,4,5,6,7,8]}],marks:[{o:0,sq:8,k:'ok'}],after:{b0:8},res:[resc('Rosso paga 1 gettone'),resc('Banco: 0 → 1')]}},
- {t:'Uscire dal tavoliere',p:[
-   `Come in Finkel serve un <b>tiro esatto</b>. Qui la pedina in casella 11 esce con tre vertici neri, cioè 4 caselle, e poi si rilancia. Con un tiro più alto non potrebbe uscire: dalla 14 serve esattamente 1, dalla 10 esattamente 5.`],
-  sc:{type:'board',b:[11],roll:R3(0,'3 neri · 4'),arrows:[{o:0,seq:[11,12,13,14,'X']}],after:{b0:15},res:[resc('Una pedina in salvo'),resc('Blu rilancia','win')]}},
- {t:'Nessuna mossa: si passa',p:[
-   `Se nessuna mossa è possibile si passa il turno <b>senza rilanciare</b>, anche quando il tiro avrebbe previsto un rilancio. Lo stesso vale con un solo vertice bianco.`,
-   `Qui Blu ha tirato tre bianchi, ma la pedina in 14 uscirebbe con un tiro troppo alto e non ci sono altre pedine da muovere o immettere.`],
-  sc:{type:'board',b:[14],bo:6,roll:R3(3,'3 bianchi · 5'),marks:[{o:0,sq:14,k:'no'}],chips:[noc('Nessuna mossa: si passa senza rilanciare')]}},
- {t:'Variante: rimbalzo',p:[
-   `Se l'unica pedina che potrebbe muoversi è quella in uscita ma il tiro è troppo alto, invece di passare avanza fino all'uscita e torna indietro del resto.`,
-   `Qui il tiro è 5: la pedina in casella 14 avanza di 1, raggiunge l'uscita e torna indietro di 4, fermandosi sulla 11. Si attiva dalle impostazioni con «Regola del rimbalzo».`],
-  sc:{type:'board',b:[14],bo:6,roll:R3(3,'3 bianchi · 5'),arrows:[{o:0,seq:[14,'X'],dy:-260},{o:0,seq:['X',14,13,12,11],dy:260,k:'k'}],after:{b0:11},res:[resc('Variante opzionale')]}},
- {t:'Variante: uscita con quattro punti',p:[
-   `In alternativa all'uscita con tiro esatto si può stabilire che una pedina esca solo con un tiro da quattro punti, cioè tre vertici neri.`,
-   `Nel gioco la pedina esce se il movimento di 4 caselle raggiunge o supera l'ultima casella: qui dalla 12. Con gli altri tiri non si esce.`],
-  sc:{type:'board',b:[12],roll:R3(0,'3 neri · 4'),arrows:[{o:0,seq:[12,13,14,'X']}],after:{b0:15},res:[resc('Una pedina in salvo')]}},
- {t:'Vittoria e banco',p:[
-   `Vince il primo che porta in salvo tutte e sette le pedine e <b>si aggiudica l'intero banco</b> accumulato con i passaggi sulle rosette. Qui Blu esce con due vertici bianchi, cioè 1 casella.`],
-  sc:{type:'board',b:[14],bo:6,roll:R3(2,'2 bianchi · 1'),arrows:[{o:0,seq:[14,'X']}],after:{b0:15},res:[resc('Blu vince','win'),resc('Prende il banco')]}},
- {t:'Il turno in sintesi',p:[`Ecco la sequenza di un turno con le regole di Bell.`],
+ {t:TT('Scopo e percorso'),p:[
+   TT(`Le regole di Bell sono la ricostruzione più diffusa prima degli studi di Finkel: si usano <b>tre dadi</b> e una <b>posta</b>.`),
+   TT(`Lo scopo è lo stesso: portare in salvo tutte e sette le pedine. Il percorso è di quattordici caselle: quattro nella propria corsia (1-4), otto nella corsia centrale in comune (5-12), due finali nella propria corsia (13-14). Le rosette sono alle caselle 4, 8 e 14.`)],
+  sc:{type:'board',arrows:routes,chips:[chipH(TT('Percorso di Blu'),'','<i class="sd p0"></i>'),chipH(TT('Percorso di Rosso'),'','<i class="sd p1"></i>'),chipH(TT('Rosette: 4, 8 e 14'))]}},
+ {t:TT('Posta e primo giocatore'),p:[
+   TT(`Prima di cominciare i giocatori stabiliscono il valore della posta e chi inizia, anche con un tiro di dadi: comincia chi ottiene il punteggio maggiore.`),
+   TT(`Nel gioco la posta è di un gettone e il tiro d'apertura è automatico. Le poste pagate si accumulano nel <b>banco</b>, che spetta a chi vince.`)],
+  sc:{type:'dice',rows:[{who:TT('Blu'),o:0,d:[true,false,false],big:'1',t:TT('1 vertice bianco')},{who:TT('Rosso'),o:1,d:[true,true,true],big:'3',t:TT('3 vertici bianchi'),s:TT('Tiro più alto: comincia Rosso')}]}},
+ {t:TT('I tre dadi'),p:[
+   TT(`Si lanciano tre dadi piramidali con vertici bianchi e neri. Il risultato non si somma: <b>ogni combinazione corrisponde a una mossa precisa</b>, come nello schema.`),
+   TT(`«Rilanciare» significa tirare ancora i dadi e fare un'altra mossa nello stesso turno.`)],
+  sc:{type:'dice',rows:bellRows()}},
+ {t:TT('Immettere la prima pedina'),p:[
+   TT(`Per mettere in gioco una pedina servono <b>tre vertici bianchi</b>. Finché non esce questo risultato, e non ci sono pedine in gioco, si passa il turno.`),
+   TT(`La pedina viene sempre collocata sulla casella 1 e si rilanciano i dadi per spostarla.`)],
+  sc:{type:'board',roll:R3(3,TT('3 bianchi')),arrows:[{o:0,seq:['H',1]}],marks:[{o:0,sq:1,k:'ok'}],after:{b0:1},res:[resc(TT('Si rilancia per muoverla'))]}},
+ {t:TT('Il rilancio della nuova pedina'),p:[
+   TT(`Il secondo lancio sposta la pedina appena immessa: tre vertici bianchi la portano avanti di 5 caselle, tre neri di 4, due bianchi di 1.`),
+   TT(`Dopo questa mossa il turno passa all'avversario.`)],
+  sc:{type:'board',b:[1],roll:R3(0,TT('3 neri · 4')),arrows:[{o:0,seq:[1,2,3,4,5]}],marks:[{o:0,sq:5,k:'ok'}],after:{b0:5}}},
+ {t:TT('Pedina ritirata'),p:[
+   TT(`Se il secondo lancio dà un solo vertice bianco non c'è movimento e la pedina appena immessa viene <b>ritirata dal gioco</b>: torna nel mucchio «Da giocare».`),
+   TT(`Nel gioco, se la casella d'arrivo è occupata da una propria pedina, la nuova pedina resta in casella 1.`)],
+  sc:{type:'board',b:[1],roll:R3(1,TT('1 bianco · 0')),after:{b0:0},res:[resc(TT('Pedina ritirata'))]}},
+ {t:TT('Tre bianchi: avanzare di 5'),p:[
+   TT(`Con tre vertici bianchi si sceglie tra due mosse: <b>immettere una pedina</b> e rilanciare, oppure <b>avanzare di 5 caselle</b> una pedina già in gioco. Nel secondo caso non si rilancia.`)],
+  sc:{type:'board',b:[2,6],roll:R3(3,TT('3 bianchi · 5')),arrows:[{o:0,seq:['H',1]},{o:0,seq:[2,3,4,5,6,7]},{o:0,seq:[6,7,8,9,10,11]}],marks:[{o:0,sq:1,k:'ok'},{o:0,sq:7,k:'ok'},{o:0,sq:11,k:'ok'}],chips:[okc(TT('Immettere una pedina')),okc(TT('Pedina in 2 → 7')),okc(TT('Pedina in 6 → 11'))]}},
+ {t:TT('Tre neri: avanzare di 4 e rilanciare'),p:[
+   TT(`Con tre vertici neri una pedina in gioco avanza di 4 caselle e si lancia ancora.`),
+   TT(`La pedina in casella 2 non può muoversi: arriverebbe sulla 6, occupata da una propria pedina. Si muove l'altra, da 6 a 10.`)],
+  sc:{type:'board',b:[2,6],roll:R3(0,TT('3 neri · 4')),arrows:[{o:0,seq:[6,7,8,9,10]}],marks:[{o:0,sq:6,k:'no'},{o:0,sq:10,k:'ok'}],after:{b1:10},res:[resc(TT('Blu rilancia'),'win')]}},
+ {t:TT('Due bianchi: avanzare di 1 e rilanciare'),p:[TT(`Con due vertici bianchi una pedina in gioco avanza di una casella e si rilancia. È il risultato più frequente insieme all'unico vertice bianco.`)],
+  sc:{type:'board',b:[6],roll:R3(2,TT('2 bianchi · 1')),arrows:[{o:0,seq:[6,7]}],marks:[{o:0,sq:7,k:'ok'}],after:{b0:7},res:[resc(TT('Blu rilancia'),'win')]}},
+ {t:TT('Saltare e catturare'),p:[
+   TT(`Si possono scavalcare le pedine, proprie o avversarie. Se il movimento termina su una pedina avversaria, questa torna nel mucchio e deve ripartire.`),
+   TT(`Nelle regole di Bell le rosette non proteggono le pedine.`)],
+  sc:{type:'board',b:[4],r:[9],roll:R3(3,TT('3 bianchi · 5')),arrows:[{o:0,seq:[4,5,6,7,8,9]}],marks:[{o:0,sq:9,k:'cap'}],after:{b0:9,r0:0},res:[resc(TT('Rosso ricomincia'))]}},
+ {t:TT('Rosette e posta'),p:[
+   TT(`Chi termina su una rosetta fa pagare la posta all'avversario, che la versa al banco. La rosetta di per sé non dà un nuovo lancio: si rilancia solo se lo prevede il tiro.`)],
+  sc:{type:'board',b:[3],roll:R3(3,TT('3 bianchi · 5')),arrows:[{o:0,seq:[3,4,5,6,7,8]}],marks:[{o:0,sq:8,k:'ok'}],after:{b0:8},res:[resc(TT('Rosso paga 1 gettone')),resc(TT('Banco: 0 → 1'))]}},
+ {t:TT('Uscire dal tavoliere'),p:[
+   TT(`Come in Finkel serve un <b>tiro esatto</b>. Qui la pedina in casella 11 esce con tre vertici neri, cioè 4 caselle, e poi si rilancia. Con un tiro più alto non potrebbe uscire: dalla 14 serve esattamente 1, dalla 10 esattamente 5.`)],
+  sc:{type:'board',b:[11],roll:R3(0,TT('3 neri · 4')),arrows:[{o:0,seq:[11,12,13,14,'X']}],after:{b0:15},res:[resc(TT('Una pedina in salvo')),resc(TT('Blu rilancia'),'win')]}},
+ {t:TT('Nessuna mossa: si passa'),p:[
+   TT(`Se nessuna mossa è possibile si passa il turno <b>senza rilanciare</b>, anche quando il tiro avrebbe previsto un rilancio. Lo stesso vale con un solo vertice bianco.`),
+   TT(`Qui Blu ha tirato tre bianchi, ma la pedina in 14 uscirebbe con un tiro troppo alto e non ci sono altre pedine da muovere o immettere.`)],
+  sc:{type:'board',b:[14],bo:6,roll:R3(3,TT('3 bianchi · 5')),marks:[{o:0,sq:14,k:'no'}],chips:[noc(TT('Nessuna mossa: si passa senza rilanciare'))]}},
+ {t:TT('Variante: rimbalzo'),p:[
+   TT(`Se l'unica pedina che potrebbe muoversi è quella in uscita ma il tiro è troppo alto, invece di passare avanza fino all'uscita e torna indietro del resto.`),
+   TT(`Qui il tiro è 5: la pedina in casella 14 avanza di 1, raggiunge l'uscita e torna indietro di 4, fermandosi sulla 11. Si attiva dalle impostazioni con «Regola del rimbalzo».`)],
+  sc:{type:'board',b:[14],bo:6,roll:R3(3,TT('3 bianchi · 5')),arrows:[{o:0,seq:[14,'X'],dy:-260},{o:0,seq:['X',14,13,12,11],dy:260,k:'k'}],after:{b0:11},res:[resc(TT('Variante opzionale'))]}},
+ {t:TT('Variante: uscita con quattro punti'),p:[
+   TT(`In alternativa all'uscita con tiro esatto si può stabilire che una pedina esca solo con un tiro da quattro punti, cioè tre vertici neri.`),
+   TT(`Nel gioco la pedina esce se il movimento di 4 caselle raggiunge o supera l'ultima casella: qui dalla 12. Con gli altri tiri non si esce.`)],
+  sc:{type:'board',b:[12],roll:R3(0,TT('3 neri · 4')),arrows:[{o:0,seq:[12,13,14,'X']}],after:{b0:15},res:[resc(TT('Una pedina in salvo'))]}},
+ {t:TT('Vittoria e banco'),p:[
+   TT(`Vince il primo che porta in salvo tutte e sette le pedine e <b>si aggiudica l'intero banco</b> accumulato con i passaggi sulle rosette. Qui Blu esce con due vertici bianchi, cioè 1 casella.`)],
+  sc:{type:'board',b:[14],bo:6,roll:R3(2,TT('2 bianchi · 1')),arrows:[{o:0,seq:[14,'X']}],after:{b0:15},res:[resc(TT('Blu vince'),'win'),resc(TT('Prende il banco'))]}},
+ {t:TT('Il turno in sintesi'),p:[TT(`Ecco la sequenza di un turno con le regole di Bell.`)],
   sc:{type:'flow',steps:[
-   `Lancia i tre dadi e conta i vertici bianchi in alto.`,
-   `Un bianco: si passa il turno, senza rilanciare.`,
-   `Due bianchi: avanza una pedina di 1 e rilancia. Tre neri: avanza una pedina di 4 e rilancia.`,
-   `Tre bianchi: immetti una pedina in casella 1 e rilancia per muoverla, oppure avanza una pedina di 5.`,
-   `Non si finisce su una propria pedina; si salta, si cattura quella avversaria.`,
-   `Su una rosetta l'avversario paga la posta al banco. L'uscita richiede un tiro esatto.`,
-   `Se nessuna mossa è possibile si passa senza rilanciare. Vince chi esce per primo con tutte le pedine e prende il banco.`]}}
+   TT(`Lancia i tre dadi e conta i vertici bianchi in alto.`),
+   TT(`Un bianco: si passa il turno, senza rilanciare.`),
+   TT(`Due bianchi: avanza una pedina di 1 e rilancia. Tre neri: avanza una pedina di 4 e rilancia.`),
+   TT(`Tre bianchi: immetti una pedina in casella 1 e rilancia per muoverla, oppure avanza una pedina di 5.`),
+   TT(`Non si finisce su una propria pedina; si salta, si cattura quella avversaria.`),
+   TT(`Su una rosetta l'avversario paga la posta al banco. L'uscita richiede un tiro esatto.`),
+   TT(`Se nessuna mossa è possibile si passa senza rilanciare. Vince chi esce per primo con tutte le pedine e prende il banco.`)]}}
 ];
-const TUTS={finkel:FIN,bell:BEL};
+
+return {finkel:FIN,bell:BEL};
+}
+let TUTS=buildTuts();
 
 let tutRules='finkel', tutI=0, tutS=null, tutTimer=0, tutOpener=null;
 const ARR_MK=['arrh0','arrh1'];
@@ -1542,7 +1599,7 @@ function tutScene(sc){
   });
   const before={}; pcs.forEach(pc=>before[pc.id]=pc.pos);
   const after=Object.assign({},before,sc.after||{});
-  fig.innerHTML='<svg class="tsvg" viewBox="-260 -260 19420 7607" role="img" aria-label="Scenario sul tavoliere"><g>'+BL.frame+BL.tiles+BL.strips+BL.nums+'</g><g>'+BL.lbls+'</g><g class="ta"></g><g class="tp"></g><g class="tm"></g></svg>'
+  fig.innerHTML='<svg class="tsvg" viewBox="-260 -260 19420 7607" role="img" aria-label="'+_('Scenario sul tavoliere','Scenario on the board')+'"><g>'+BL.frame+BL.tiles+BL.strips+BL.nums+'</g><g>'+BL.lbls+'</g><g class="ta"></g><g class="tp"></g><g class="tm"></g></svg>'
     +'<div class="tut-chips">'+(sc.roll||'')+(sc.chips||[]).join('')+(sc.res||[]).join('')+'</div>';
   const svgEl=fig.querySelector('svg'), layer=fig.querySelector('.tp');
   pcs.forEach(pc=>{pc.el=pieceEl(pc.o);layer.appendChild(pc.el);});
@@ -1566,12 +1623,12 @@ function tutReplay(){
 }
 function tutRender(){
   const list=TUTS[tutRules], s=list[tutI];
-  $('#tutStep').textContent='Passo '+(tutI+1)+' di '+list.length+' · '+(tutRules==='finkel'?'regole di Finkel':'regole di Bell');
+  $('#tutStep').textContent=_('Passo '+(tutI+1)+' di '+list.length+' · '+(tutRules==='finkel'?'regole di Finkel':'regole di Bell'),'Step '+(tutI+1)+' of '+list.length+' · '+(tutRules==='finkel'?'Finkel rules':'Bell rules'));
   $('#tutText').innerHTML='<h3>'+s.t+'</h3>'+s.p.map(x=>'<p>'+x+'</p>').join('');
   tutScene(s.sc);
   $('#tutPrev').disabled=tutI===0; $('#tutNext').disabled=tutI===list.length-1;
   $('#tutReplay').hidden=!s.sc.after;
-  $('#tutDots').innerHTML=list.map((x,i)=>'<button type="button" data-i="'+i+'" aria-label="Passo '+(i+1)+': '+x.t+'"'+(i===tutI?' aria-current="true"':'')+'></button>').join('');
+  $('#tutDots').innerHTML=list.map((x,i)=>'<button type="button" data-i="'+i+'" aria-label="'+_('Passo ','Step ')+(i+1)+': '+x.t+'"'+(i===tutI?' aria-current="true"':'')+'></button>').join('');
   $('.tut-body').scrollTop=0;
 }
 function tutGo(i){const n=TUTS[tutRules].length; tutI=Math.max(0,Math.min(n-1,i)); tutRender();}
@@ -1605,8 +1662,14 @@ document.addEventListener('keydown',e=>{
   }
 });
 
+langHooks.push(()=>{TUTS=buildTuts();if(!$('#tut').hidden)tutRender();});
+langHooks.unshift(()=>{NAMES[0]=_('Blu','Blue');NAMES[1]=_('Rosso','Red');});
+langHooks.unshift(()=>{
+  const bl=(i,t)=>{BL.lbls=BL.lbls.replace(new RegExp('(data-bl="'+i+'">)[^<]*','g'),'$1'+t);};
+  bl(0,_('In salvo','Safe'));bl(1,_('Da giocare','To play'));
+  $('#lbls').innerHTML=BL.lbls;
+});
+langHooks.push(()=>{if(st){render();setCapt();}});
 syncOpts(); startGame();
 })();
 </script>
-</body>
-</html>

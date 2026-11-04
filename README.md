@@ -1,16 +1,14 @@
 # Gioco Reale di Ur
 
-[![Versione](https://img.shields.io/badge/versione-1.5-blue)](#versioni)
+[![Versione](https://img.shields.io/badge/versione-1.6-blue)](#versioni)
 [![Licenza: AGPL v3](https://img.shields.io/badge/licenza-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![GitHub Pages](https://img.shields.io/badge/demo-GitHub%20Pages-222?logo=github)](#pubblicazione-su-github-pages)
 [![HTML5](https://img.shields.io/badge/HTML5-single%20file-E34F26?logo=html5&logoColor=white)](index.html)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES2020-F7DF1E?logo=javascript&logoColor=black)](index.html)
 [![Three.js](https://img.shields.io/badge/Three.js-r128-000?logo=threedotjs&logoColor=white)](https://threejs.org/)
-[![Lingua](https://img.shields.io/badge/lingua-italiano-green)](#)
+[![Lingua](https://img.shields.io/badge/lingua-italiano%20%7C%20inglese-green)](#)
 
 Versione per browser del Gioco Reale di Ur, il gioco da tavolo diffuso in Mesopotamia dal III millennio a.C. e documentato dalle tavole della necropoli reale di Ur. Il progetto è una singola pagina HTML, senza fase di build e senza installazione.
-
-[Puoi giocarlo qui](https://tagtthespellcaster.github.io/Gioco-Reale-di-Ur/)
 
 ## Caratteristiche
 
@@ -23,6 +21,7 @@ Versione per browser del Gioco Reale di Ur, il gioco da tavolo diffuso in Mesopo
 - **Audio** sintetizzato con Web Audio, senza file esterni: effetti sonori (attivi di default) e colonna sonora d'ispirazione mesopotamica (disattivata di default). La scelta è salvata nel browser.
 - **Regole illustrate**: tutorial animato per Finkel (15 schermate) e Bell (17), con scenari verificati dal motore di gioco.
 - **Storia**: sequenza a titoli cinematografici sulla storia del gioco, tratta dalla voce «Gioco reale di Ur» di Wikipedia, avviabile dal pulsante in alto.
+- **Lingua**: interfaccia in italiano e inglese, con selettore IT/EN nella pagina. La scelta è salvata nel browser; al primo accesso si usa la lingua del browser.
 - Interfaccia adattabile a schermi piccoli, con tema chiaro e scuro automatico, e navigazione da tastiera sulle pedine.
 
 ## Come si gioca
@@ -41,6 +40,12 @@ Al caricamento la pagina scarica da CDN, se raggiungibili:
 - i caratteri da Google Fonts (senza, vengono usati i caratteri di sistema).
 
 Il gioco funziona anche senza questi due caricamenti.
+
+## Pubblicazione su GitHub Pages
+
+1. Copia `index.html` nella radice del repository.
+2. In *Settings → Pages* scegli il branch (ad esempio `main`) e la cartella `/ (root)`.
+3. La pagina sarà disponibile all'indirizzo `https://<utente>.github.io/<repository>/`.
 
 ## Struttura
 
@@ -72,6 +77,7 @@ Le regole originali sono sconosciute: tutte le versioni di gioco sono ricostruzi
 | 1.3 | «Regole illustrate» per Finkel e Bell. |
 | 1.4 | Animazione delle pedine, dadi rossi per Rosso, effetti sonori, colonna sonora, storia, impostazione di 5 o 7 pedine. |
 | 1.5 | Layout compatto: tavoliere e comandi di lancio nella stessa schermata su display a partire da 1000 px di larghezza. |
+| 1.6 | Interfaccia in italiano e inglese con selettore della lingua. |
 
 ## Fonti
 
