@@ -1,12 +1,13 @@
 # Gioco Reale di Ur
 
+[English version](README.en.md)
+
 [![Versione](https://img.shields.io/badge/versione-1.6-blue)](#versioni)
 [![Licenza: AGPL v3](https://img.shields.io/badge/licenza-AGPL--3.0-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 [![GitHub Pages](https://img.shields.io/badge/demo-GitHub%20Pages-222?logo=github)](#pubblicazione-su-github-pages)
 [![HTML5](https://img.shields.io/badge/HTML5-single%20file-E34F26?logo=html5&logoColor=white)](index.html)
 [![JavaScript](https://img.shields.io/badge/JavaScript-ES2020-F7DF1E?logo=javascript&logoColor=black)](index.html)
 [![Three.js](https://img.shields.io/badge/Three.js-r128-000?logo=threedotjs&logoColor=white)](https://threejs.org/)
-[![Lingua](https://img.shields.io/badge/lingua-italiano%20%7C%20inglese-green)](#)
 
 Versione per browser del Gioco Reale di Ur, il gioco da tavolo diffuso in Mesopotamia dal III millennio a.C. e documentato dalle tavole della necropoli reale di Ur. Il progetto è una singola pagina HTML, senza fase di build e senza installazione.
 
